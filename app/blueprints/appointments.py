@@ -70,9 +70,9 @@ def create_appointment():
             }
         }), 201
         
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return jsonify({"error": f"Failed to book appointment: {str(e)}"}), 500
+        return jsonify({"error": "Failed to book appointment"}), 500
 
 
 @appointments_bp.route('', methods=['GET'])
@@ -133,3 +133,29 @@ def update_status(appointment_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to modify appointment status: {str(e)}"}), 500
+
+@appointments_bp.route('/<string:appointment_id>', methods=['DELETE'])
+@login_required
+def cancel_appointment(appointment_id):
+
+    appointment = Appointment.query.filter_by(
+        id=appointment_id,
+        is_deleted=False
+    ).first()
+
+    if not appointment:
+        return jsonify({"error": "Appointment not found"}), 404
+
+    if current_user.role != "admin":
+        if appointment.customer_id != current_user.customer.id:
+            return jsonify({"error": "Unauthorized"}), 403
+
+    appointment.status = "cancelled"
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Appointment cancelled successfully"
+    }), 200
+
+    

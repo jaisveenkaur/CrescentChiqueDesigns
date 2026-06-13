@@ -5,6 +5,9 @@ from app.extensions import db
 from app.models import User, Customer
 
 auth_bp = Blueprint('auth', __name__)
+@auth_bp.route("/ping")
+def ping():
+    return {"message": "Auth blueprint working"}
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
