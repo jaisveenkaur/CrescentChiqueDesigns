@@ -16,7 +16,7 @@ from werkzeug.security import generate_password_hash
 
 # pyrefly: ignore [missing-import]
 
-from app.models import db, User, Customer, Design, DesignImage, Appointment, Quotation, Project, Lead, Notification
+from app.models import db, User, Customer, Design, DesignImage, Appointment, Quotation, Project, Lead, Notification, File
 
 
 
@@ -26,6 +26,7 @@ def seed_database():
     # 1. Clear existing data (in dependency order)
     print("Purging existing records...")
     Notification.query.delete()
+    File.query.delete()
     Lead.query.delete()
     Project.query.delete()
     Quotation.query.delete()
@@ -240,6 +241,17 @@ def seed_database():
         is_read=False
     )
     db.session.add(notification)
+
+    # 9. Seed Files
+    print("Seeding customer files documents...")
+    customer_file = File(
+        id=str(uuid.uuid4()),
+        customer_id=customer_profile_id,
+        filename="Worli_Apartment_Floorplan.pdf",
+        file_url="/static/uploads/files/worli_flat_402.pdf",
+        file_type="pdf"
+    )
+    db.session.add(customer_file)
 
     # Commit all changes to the database
     db.session.commit()
