@@ -34,6 +34,7 @@ def create_app(config_name=None):
     from app.blueprints.quotations import quotations_bp
     from app.blueprints.projects import projects_bp
     from app.blueprints.notifications import notifications_bp
+    from app.blueprints.files import files_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(designs_bp, url_prefix='/api/v1/designs')
@@ -41,6 +42,7 @@ def create_app(config_name=None):
     app.register_blueprint(quotations_bp, url_prefix='/api/v1/quotations')
     app.register_blueprint(projects_bp, url_prefix='/api/v1/projects')
     app.register_blueprint(notifications_bp, url_prefix='/api/v1/notifications')
+    app.register_blueprint(files_bp, url_prefix='/api/v1/files')
 
     @app.route("/")
     def home():

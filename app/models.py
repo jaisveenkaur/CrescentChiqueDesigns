@@ -68,6 +68,7 @@ class Customer(UUIDBase):
     projects = relationship('Project', back_populates='customer', cascade="all, delete-orphan")
     leads = relationship('Lead', back_populates='customer')
     notifications = relationship('Notification', back_populates='customer', cascade="all, delete-orphan")
+    files = relationship('File', back_populates='customer', cascade="all, delete-orphan")
 
 
 class Design(UUIDBase):
@@ -210,3 +211,17 @@ class Notification(UUIDBase):
     
     # Relationships
     customer = relationship('Customer', back_populates='notifications')
+
+
+class File(UUIDBase):
+    """Stores metadata of customer uploaded files (floor plans, site images, specifications)."""
+    __tablename__ = 'files'
+    
+    customer_id = Column(String(36), ForeignKey('customers.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    filename = Column(String(255), nullable=False)
+    file_url = Column(String(512), nullable=False)
+    file_type = Column(String(100), nullable=False)
+    uploaded_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    
+    # Relationships
+    customer = relationship('Customer', back_populates='files')
