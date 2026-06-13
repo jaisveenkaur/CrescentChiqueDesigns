@@ -15,7 +15,7 @@ from werkzeug.security import generate_password_hash
 
 
 # pyrefly: ignore [missing-import]
-from flask import Flask
+
 from app.models import db, User, Customer, Design, DesignImage, Appointment, Quotation, Project, Lead, Notification
 
 
