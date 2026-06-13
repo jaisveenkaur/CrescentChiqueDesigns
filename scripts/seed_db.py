@@ -234,7 +234,7 @@ def seed_database():
     print("Seeding customer notifications alerts...")
     notification = Notification(
         id=str(uuid.uuid4()),
-        user_id=customer_user_id,
+        customer_id=customer_profile_id,
         title="Project Stage Updated",
         message="Great news! Your living room project has successfully transitioned to the 'Execution' phase. Track progress on your dashboard.",
         is_read=False
