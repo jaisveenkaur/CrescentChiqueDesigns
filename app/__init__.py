@@ -31,10 +31,12 @@ def create_app(config_name=None):
     from app.blueprints.auth import auth_bp
     from app.blueprints.designs import designs_bp
     from app.blueprints.appointments import appointments_bp
+    from app.blueprints.quotations import quotations_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(designs_bp, url_prefix='/api/v1/designs')
     app.register_blueprint(appointments_bp, url_prefix='/api/v1/appointments')
+    app.register_blueprint(quotations_bp, url_prefix='/api/v1/quotations')
 
     @app.route("/")
     def home():
