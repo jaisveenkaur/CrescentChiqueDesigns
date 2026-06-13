@@ -36,7 +36,6 @@ class User(UUIDBase, UserMixin):
     
     # Relationships
     customer = relationship('Customer', back_populates='user', uselist=False, cascade="all, delete-orphan")
-    notifications = relationship('Notification', back_populates='user', cascade="all, delete-orphan")
     
     @validates('email')
     def validate_email(self, key, address):
@@ -68,6 +67,7 @@ class Customer(UUIDBase):
     quotations = relationship('Quotation', back_populates='customer', cascade="all, delete-orphan")
     projects = relationship('Project', back_populates='customer', cascade="all, delete-orphan")
     leads = relationship('Lead', back_populates='customer')
+    notifications = relationship('Notification', back_populates='customer', cascade="all, delete-orphan")
 
 
 class Design(UUIDBase):
@@ -199,16 +199,14 @@ class Lead(UUIDBase):
         return value
 
 
-class Notification(db.Model):
-    """Transactional platform notifications pushing status alerts to specific users."""
+class Notification(UUIDBase):
+    """Transactional platform notifications pushing status alerts to specific customers."""
     __tablename__ = 'notifications'
     
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String(36), ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    customer_id = Column(String(36), ForeignKey('customers.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     title = Column(String(150), nullable=False)
     message = Column(Text, nullable=False)
     is_read = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     
     # Relationships
-    user = relationship('User', back_populates='notifications')
+    customer = relationship('Customer', back_populates='notifications')
