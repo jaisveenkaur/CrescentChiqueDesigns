@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Lead Status Update - Crescent Chique Designs</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f5f7; color: #2d3748;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f5f7; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); overflow: hidden;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #1a202c; padding: 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #d69e2e; font-size: 24px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase;">Crescent Chique Designs</h1>
+                        </td>
+                    </tr>
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <h2 style="margin-top: 0; font-size: 20px; color: #2d3748; font-weight: 600;">Inquiry Lead Status Update</h2>
+                            <p style="font-size: 16px; line-height: 1.6; color: #4a5568;">Hello,</p>
+                            <p style="font-size: 16px; line-height: 1.6; color: #4a5568;">Your design inquiry lead status has been successfully updated on our platform.</p>
+                            
+                            <!-- Status Card -->
+                            <table width="100%" border="0" cellspacing="0" cellpadding="15" style="background-color: #f7fafc; border-radius: 6px; margin: 30px 0; border-left: 4px solid #d69e2e;">
+                                <tr>
+                                    <td style="padding: 15px;">
+                                        <p style="margin: 0; font-size: 14px; color: #718096; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Update Summary</p>
+                                        <p style="margin: 10px 0 0 0; font-size: 16px; color: #2d3748;"><strong>Lead Status:</strong> <span style="background-color: #ebf8ff; color: #2b6cb0; padding: 2px 8px; border-radius: 9999px; font-size: 14px; text-transform: uppercase; font-weight: 600;">{{ status }}</span></p>
+                                        {% if requirements %}
+                                        <p style="margin: 10px 0 0 0; font-size: 16px; color: #2d3748;"><strong>Requirements Summary:</strong></p>
+                                        <p style="margin: 5px 0 0 0; font-size: 15px; color: #4a5568; line-height: 1.5; font-style: italic;">"{{ requirements }}"</p>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="font-size: 16px; line-height: 1.6; color: #4a5568;">We will reach out to you shortly with next steps or requested details regarding your renovation requirements.</p>
+                            <p style="font-size: 16px; line-height: 1.6; color: #4a5568; margin-bottom: 0;">Warm regards,<br><strong style="color: #1a202c;">The Crescent Chique Team</strong></p>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f7fafc; padding: 20px; text-align: center; border-top: 1px solid #edf2f7; font-size: 12px; color: #a0aec0;">
+                            &copy; 2026 Crescent Chique Designs. All rights reserved.<br>
+                            Elegant Interiors & Bespoke Renovation Services.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

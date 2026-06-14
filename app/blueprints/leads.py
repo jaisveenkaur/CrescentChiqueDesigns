@@ -188,6 +188,11 @@ def update_lead_status(lead_id):
         # Audit logging
         AuditService.log(current_user.id, "Lead Status Updated", f"Lead ID {lead.id} status updated to {lead.status}")
         
+        # Email Notification
+        from app.services.email_service import EmailService
+        EmailService.send_lead_status_update(lead)
+
+        
         return jsonify({
             "message": "Lead status updated successfully",
             "lead": {

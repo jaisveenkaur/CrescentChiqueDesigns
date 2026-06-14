@@ -48,6 +48,11 @@ def upload_file():
         # Audit logging
         AuditService.log(current_user.id, "File Uploaded", f"File ID {db_file.id} uploaded. Filename: {db_file.filename}")
         
+        # Email Notification
+        from app.services.email_service import EmailService
+        EmailService.send_file_upload_confirmation(db_file)
+
+        
         return jsonify({
             "id": db_file.id,
             "customer_id": db_file.customer_id,

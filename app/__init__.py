@@ -1,7 +1,7 @@
 import os
 # pyrefly: ignore [missing-import]
 from flask import Flask
-from app.extensions import db, migrate, login_manager
+from app.extensions import db, migrate, login_manager, mail
 from config import config_by_name
 
 def create_app(config_name=None):
@@ -16,6 +16,8 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    mail.init_app(app)
+
     
     # Configure Flask-Login settings
     login_manager.login_view = 'auth.login'

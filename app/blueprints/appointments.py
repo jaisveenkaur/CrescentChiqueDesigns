@@ -65,6 +65,10 @@ def create_appointment():
         # Audit logging
         AuditService.log(current_user.id, "Appointment Created", f"Appointment ID {appointment.id} scheduled for {appointment.appointment_date} {appointment.appointment_time}")
         
+        # Email Notification
+        from app.services.email_service import EmailService
+        EmailService.send_appointment_confirmation(appointment)
+        
         return jsonify({
             "message": "Appointment scheduled successfully",
             "appointment": {

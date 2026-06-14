@@ -90,6 +90,11 @@ def save_quotation():
         # Audit logging
         AuditService.log(current_user.id, "Quotation Created", f"Quotation ID {quotation.id} created with amount {quotation.total_amount}")
         
+        # Email Notification
+        from app.services.email_service import EmailService
+        EmailService.send_quotation_generated(quotation, is_pdf=False)
+
+        
         return jsonify({
             "id": quotation.id,
             "customer_id": quotation.customer_id,
@@ -242,6 +247,11 @@ def download_quotation_pdf(quotation_id):
         
         # Audit logging
         AuditService.log(current_user.id, "PDF Generated", f"PDF generated for Quotation ID {quotation.id}")
+        
+        # Email Notification
+        from app.services.email_service import EmailService
+        EmailService.send_quotation_generated(quotation, is_pdf=True)
+
         
         return send_file(
             pdf_buffer,

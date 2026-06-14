@@ -16,8 +16,10 @@ Welcome to the developer-facing API documentation for the Crescent Chique Design
 9. [Leads](#leads)
 10. [Dashboard Analytics](#dashboard-analytics)
 11. [Audit Logs](#audit-logs)
-12. [Search & Pagination Reference](#search--pagination-reference)
-13. [Error Handling Reference](#error-handling-reference)
+12. [Email Notifications](#email-notifications)
+13. [Search & Pagination Reference](#search--pagination-reference)
+14. [Error Handling Reference](#error-handling-reference)
+
 
 ---
 
@@ -1087,7 +1089,50 @@ Allowed extensions are `pdf`, `png`, `jpg`, and `jpeg`. The maximum allowed file
 
 ---
 
+## Email Notifications
+
+The system includes an automated Email Notification module built with `Flask-Mail` that sends beautifully formatted HTML notifications on critical business actions.
+
+### Email Triggers
+
+Emails are automatically dispatched in the background when:
+1. **Appointment Booked**: Triggered upon creation of a new consultation appointment.
+2. **Lead Status Updated**: Triggered when an administrator changes a lead status.
+3. **Project Status Updated**: Triggered when an administrator updates a project phase or progress.
+4. **Quotation Generated**: Triggered when a new cost quotation is saved in the database.
+5. **PDF Generated**: Triggered when a quotation PDF is downloaded/generated.
+6. **File Uploaded**: Triggered when a client successfully uploads a design document or floor plan.
+
+### Configuration Requirements
+
+The following configurations must be set in the `.env` file for SMTP mail dispatch to operate:
+- `MAIL_SERVER`: SMTP server hostname (default: `localhost`).
+- `MAIL_PORT`: SMTP port (default: `1025`).
+- `MAIL_USE_TLS`: Enable/disable TLS (default: `False`).
+- `MAIL_USERNAME`: Username credentials for authentication.
+- `MAIL_PASSWORD`: Password credentials for authentication.
+- `MAIL_DEFAULT_SENDER`: Mail envelope sender address (default: `no-reply@crescentchique.com`).
+
+### Email Templates
+
+All email messages use rich, styled HTML templates located under `app/templates/emails/`:
+- `appointment_confirmation.html`: Confirms name, date, time, and status.
+- `lead_status_update.html`: Details the updated lead status and requirements.
+- `project_status_update.html`: Renders the new phase milestone and expected completion.
+- `quotation_generated.html`: Renders total quotation estimates and displays a button redirecting users to their PDF download link.
+- `file_uploaded.html`: Details document registration name and timestamp.
+
+### Fail-Safe Dispatch & Audit Logs
+
+If SMTP connection failures occur, the transactional endpoint will **not** rollback database changes. Instead:
+- Stderr prints the execution stack trace safely.
+- A system failure is recorded in the `AuditLog` table with action classification `"Email Failed"`.
+- Successful dispatches are recorded as `"Email Sent"`.
+
+---
+
 ## Search & Pagination Reference
+
 
 Standard GET request parameters:
 - `page`: Target page number index (integer starting at 1, defaults to 1).

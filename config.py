@@ -24,6 +24,15 @@ class Config:
         "DATABASE_URL",
         f"mysql+pymysql://{DB_USER}:{encoded_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
+    
+    # Flask-Mail configuration parameters
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'localhost')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 1025))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'False').lower() in ('true', '1', 't')
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'False').lower() in ('true', '1', 't')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', None)
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', None)
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'no-reply@crescentchique.com')
  
 class DevelopmentConfig(Config):
     DEBUG = True

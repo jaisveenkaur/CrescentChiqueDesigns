@@ -132,6 +132,11 @@ def update_project_status(project_id):
         # Audit logging
         AuditService.log(current_user.id, "Project Status Updated", f"Project ID {project.id} status updated to {project.project_status} (progress: {project.progress_percentage}%)")
         
+        # Email Notification
+        from app.services.email_service import EmailService
+        EmailService.send_project_status_update(project)
+
+        
         return jsonify({
             "message": "Project status updated successfully",
             "project": {
