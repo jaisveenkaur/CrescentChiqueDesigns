@@ -5,6 +5,7 @@ from app.extensions import db
 from app.models import File
 from app.services.file_service import FileService
 from app.services.soft_delete_service import SoftDeleteService
+from app.services.audit_service import AuditService
 
 files_bp = Blueprint('files', __name__)
 
@@ -43,6 +44,9 @@ def upload_file():
         )
         db.session.add(db_file)
         db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "File Uploaded", f"File ID {db_file.id} uploaded. Filename: {db_file.filename}")
         
         return jsonify({
             "id": db_file.id,

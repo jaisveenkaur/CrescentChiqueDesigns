@@ -1,10 +1,11 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from flask_login import login_required, current_user
 from functools import wraps
 from app.extensions import db
 from app.models import Quotation
 from app.services.quotation_service import QuotationService
 from app.services.soft_delete_service import SoftDeleteService
+from app.services.audit_service import AuditService
 
 quotations_bp = Blueprint('quotations', __name__)
 
@@ -85,6 +86,9 @@ def save_quotation():
         )
         db.session.add(quotation)
         db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Quotation Created", f"Quotation ID {quotation.id} created with amount {quotation.total_amount}")
         
         return jsonify({
             "id": quotation.id,
@@ -217,3 +221,34 @@ def restore_quotation(quotation_id):
         return jsonify({"error": str(e)}), 404
     except Exception as e:
         return jsonify({"error": f"Failed to restore quotation: {str(e)}"}), 500
+
+
+@quotations_bp.route('/<string:quotation_id>/pdf', methods=['GET'])
+@login_required
+def download_quotation_pdf(quotation_id):
+    """Generates and returns the downloadable PDF format for a specific quotation."""
+    quotation = Quotation.query.filter_by(id=quotation_id, is_deleted=False).first()
+    if not quotation:
+        return jsonify({"error": "Quotation not found"}), 404
+
+    # Access control verification
+    if current_user.role != 'admin':
+        if not current_user.customer or quotation.customer_id != current_user.customer.id:
+            return jsonify({"error": "Unauthorized view access"}), 403
+
+    try:
+        from app.services.pdf_service import PDFService
+        pdf_buffer = PDFService.generate_quotation_pdf(quotation)
+        
+        # Audit logging
+        AuditService.log(current_user.id, "PDF Generated", f"PDF generated for Quotation ID {quotation.id}")
+        
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f"quotation_{quotation.id}.pdf"
+        )
+    except Exception as e:
+        return jsonify({"error": f"Failed to generate PDF: {str(e)}"}), 500
+

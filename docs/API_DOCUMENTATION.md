@@ -15,8 +15,9 @@ Welcome to the developer-facing API documentation for the Crescent Chique Design
 8. [Files](#files)
 9. [Leads](#leads)
 10. [Dashboard Analytics](#dashboard-analytics)
-11. [Search & Pagination Reference](#search--pagination-reference)
-12. [Error Handling Reference](#error-handling-reference)
+11. [Audit Logs](#audit-logs)
+12. [Search & Pagination Reference](#search--pagination-reference)
+13. [Error Handling Reference](#error-handling-reference)
 
 ---
 
@@ -524,6 +525,17 @@ All stateful session authentication is managed via session cookies tracked using
 * **Error Responses**:
   - `403 Forbidden`: Unauthorized view access.
   - `404 Not Found`: Quotation invoice not found.
+
+### Download Quotation PDF
+* **Method**: `GET`
+* **URL**: `/api/v1/quotations/<id>/pdf`
+* **Purpose**: Generates and returns a styled PDF document of the target cost quotation.
+* **Authorization**: Customer (owning profile) / Admin
+* **Success Response (200 OK)**: Returns the generated binary PDF file (`application/pdf`) with `Content-Disposition: attachment; filename="quotation_<id>.pdf"`.
+* **Error Responses**:
+  - `403 Forbidden`: Unauthorized view access.
+  - `404 Not Found`: Quotation invoice not found.
+  - `500 Internal Server Error`: PDF generation failure.
 
 ### Soft Delete Quotation
 * **Method**: `DELETE`
@@ -1036,6 +1048,42 @@ Allowed extensions are `pdf`, `png`, `jpg`, and `jpeg`. The maximum allowed file
 * **Error Responses**:
   - `403 Forbidden`: Customer privilege required.
   - `404 Not Found`: Customer profile details not found.
+
+---
+
+## Audit Logs
+
+### List Audit Logs
+* **Method**: `GET`
+* **URL**: `/api/v1/audit-logs`
+* **Purpose**: Fetches system audit logs representing user logins, logout, and record updates (Admin only).
+* **Authorization**: Admin
+* **Query Parameters**:
+  - `page` (default: 1)
+  - `per_page` (default: 10)
+  - `action`: Filter by exact action name (e.g. `User Login`, `Lead Created`)
+  - `user_id`: Filter by exact user UUID
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "page": 1,
+    "per_page": 10,
+    "total": 15,
+    "pages": 2,
+    "items": [
+      {
+        "id": "e421d0f2-dbda-417b-84eb-6660b7293eb8",
+        "user_id": "3a31b18e-4ce5-4e90-af18-41e489aac404",
+        "action": "User Login",
+        "details": "User john.doe@gmail.com logged in",
+        "timestamp": "2026-06-14T18:00:00"
+      }
+    ]
+  }
+  ```
+* **Error Responses**:
+  - `400 Bad Request`: Invalid page or per_page values.
+  - `403 Forbidden`: Admin privilege required.
 
 ---
 

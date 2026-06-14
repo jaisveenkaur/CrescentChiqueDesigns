@@ -36,6 +36,7 @@ class User(UUIDBase, UserMixin):
     
     # Relationships
     customer = relationship('Customer', back_populates='user', uselist=False, cascade="all, delete-orphan")
+    audit_logs = relationship('AuditLog', back_populates='user', cascade="all, delete-orphan")
     
     @validates('email')
     def validate_email(self, key, address):
@@ -225,3 +226,17 @@ class File(UUIDBase):
     
     # Relationships
     customer = relationship('Customer', back_populates='files')
+
+
+class AuditLog(UUIDBase):
+    """System audit logs tracking actions executed by users."""
+    __tablename__ = 'audit_logs'
+    
+    user_id = Column(String(36), ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    action = Column(String(255), nullable=False)
+    details = Column(Text, nullable=True)
+    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
+    
+    # Relationships
+    user = relationship('User', back_populates='audit_logs')
+

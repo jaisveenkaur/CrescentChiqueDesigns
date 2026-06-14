@@ -7,7 +7,7 @@ sys.path.insert(
     os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 )
 from app import create_app
-from app.models import db, User, Customer, Design, DesignImage, Appointment, Quotation, Project, Lead, Notification, File
+from app.models import db, User, Customer, Design, DesignImage, Appointment, Quotation, Project, Lead, Notification, File, AuditLog
 
 # Import modular seed functions
 from scripts.seed_users import seed_users
@@ -19,6 +19,7 @@ from scripts.seed_projects import seed_projects
 from scripts.seed_leads import seed_leads
 from scripts.seed_notifications import seed_notifications
 from scripts.seed_files import seed_files
+from scripts.seed_audit_logs import seed_audit_logs
 
 def seed_database():
     """Orchestrates database seeding sequence.
@@ -30,6 +31,7 @@ def seed_database():
     
     # 1. Clear existing data in correct dependency order
     print("Purging existing records...")
+    AuditLog.query.delete()
     Notification.query.delete()
     File.query.delete()
     Lead.query.delete()
@@ -72,6 +74,9 @@ def seed_database():
     
     print("Executing Files metadata seed...")
     seed_files(customer_profile_id)
+    
+    print("Executing Audit Logs seed...")
+    seed_audit_logs(admin_id, customer_user_id)
     
     # Commit final transaction
     db.session.commit()

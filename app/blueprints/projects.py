@@ -5,6 +5,7 @@ from app.extensions import db
 from app.models import Project
 from app.services.project_service import ProjectService
 from app.services.soft_delete_service import SoftDeleteService
+from app.services.audit_service import AuditService
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -127,6 +128,9 @@ def update_project_status(project_id):
         
         # Committing transaction changes
         db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Project Status Updated", f"Project ID {project.id} status updated to {project.project_status} (progress: {project.progress_percentage}%)")
         
         return jsonify({
             "message": "Project status updated successfully",

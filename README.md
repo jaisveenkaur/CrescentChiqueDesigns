@@ -182,6 +182,7 @@ For detailed request/response payload examples, refer to [API_DOCUMENTATION.md](
 | **Quotations** | `POST` | `/api/v1/quotations/generate` | On-the-fly cost calculation | Public |
 | | `POST` | `/api/v1/quotations` | Create and save quotation | Customer |
 | | `GET` | `/api/v1/quotations` | Lists quotations (Paginated) | Customer / Admin |
+| | `GET` | `/api/v1/quotations/<id>/pdf` | Download quotation PDF | Customer / Admin |
 | | `DELETE` | `/api/v1/quotations/<id>` | Soft delete quotation | Admin |
 | | `PUT` | `/api/v1/quotations/<id>/restore`| Restore quotation | Admin |
 | **Projects** | `GET` | `/api/v1/projects` | Lists projects (Paginated) | Customer / Admin |
@@ -202,6 +203,7 @@ For detailed request/response payload examples, refer to [API_DOCUMENTATION.md](
 | | `PUT` | `/api/v1/leads/<id>/restore` | Restore lead record | Admin |
 | **Dashboard** | `GET` | `/api/v1/dashboard/admin` | Administrative statistics | Admin |
 | | `GET` | `/api/v1/dashboard/customer` | Customer metrics overview | Customer |
+| **Audit Logs** | `GET` | `/api/v1/audit-logs` | Lists system audit logs (Paginated) | Admin |
 
 ---
 

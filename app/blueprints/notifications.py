@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from app.extensions import db
 from app.models import Notification
 from app.services.notification_service import NotificationService
+from app.services.audit_service import AuditService
 
 notifications_bp = Blueprint('notifications', __name__)
 
@@ -70,6 +71,9 @@ def mark_notification_read(notification_id):
         # Business logic validation via the service layer
         notification = NotificationService.mark_as_read(notification_id, current_user.customer.id)
         db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Notification Marked Read", f"Notification ID {notification.id} marked as read")
         
         return jsonify({
             "message": "Notification marked as read successfully",

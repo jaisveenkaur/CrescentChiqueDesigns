@@ -5,6 +5,7 @@ from functools import wraps
 from app.extensions import db
 from app.models import Appointment, Customer
 from app.services.appointment_service import AppointmentService
+from app.services.audit_service import AuditService
 
 appointments_bp = Blueprint('appointments', __name__)
 
@@ -60,6 +61,9 @@ def create_appointment():
         )
         db.session.add(appointment)
         db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Appointment Created", f"Appointment ID {appointment.id} scheduled for {appointment.appointment_date} {appointment.appointment_time}")
         
         return jsonify({
             "message": "Appointment scheduled successfully",
@@ -147,6 +151,10 @@ def update_status(appointment_id):
     try:
         appointment.status = new_status
         db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Appointment Updated", f"Appointment ID {appointment.id} status updated to {appointment.status}")
+        
         return jsonify({
             "message": "Appointment status modified successfully",
             "appointment": {
@@ -176,11 +184,11 @@ def cancel_appointment(appointment_id):
             return jsonify({"error": "Unauthorized"}), 403
 
     appointment.status = "cancelled"
-
     db.session.commit()
-
+    
+    # Audit logging
+    AuditService.log(current_user.id, "Appointment Updated", f"Appointment ID {appointment.id} status updated to {appointment.status}")
+    
     return jsonify({
         "message": "Appointment cancelled successfully"
     }), 200
-
-    

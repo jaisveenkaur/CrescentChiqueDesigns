@@ -5,6 +5,7 @@ from app.extensions import db
 from app.models import Lead
 from app.services.lead_service import LeadService
 from app.services.soft_delete_service import SoftDeleteService
+from app.services.audit_service import AuditService
 
 leads_bp = Blueprint('leads', __name__)
 
@@ -55,6 +56,9 @@ def create_lead():
         )
         db.session.add(lead)
         db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Lead Created", f"Lead ID {lead.id} created for customer {lead.customer_id}")
         
         return jsonify({
             "message": "Lead created successfully",
@@ -180,6 +184,9 @@ def update_lead_status(lead_id):
     try:
         lead.status = clean_status
         db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Lead Status Updated", f"Lead ID {lead.id} status updated to {lead.status}")
         
         return jsonify({
             "message": "Lead status updated successfully",

@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
 from app.models import User, Customer
+from app.services.audit_service import AuditService
 
 auth_bp = Blueprint('auth', __name__)
 @auth_bp.route("/ping")
@@ -81,6 +82,9 @@ def login():
     # Start session
     login_user(user, remember=data.get('remember', False))
     
+    # Audit logging
+    AuditService.log(user.id, "User Login", f"User {user.email} logged in")
+    
     response = {
         "message": "Login successful",
         "user": {
@@ -97,6 +101,9 @@ def login():
 @login_required
 def logout():
     """Terminates active session context."""
+    # Audit logging
+    AuditService.log(current_user.id, "User Logout", f"User {current_user.email} logged out")
+    
     logout_user()
     return jsonify({"message": "Logout successful"}), 200
 
