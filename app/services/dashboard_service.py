@@ -40,6 +40,15 @@ class DashboardService:
         ).scalar() or 0
         uploaded_files = db.session.query(func.count(File.id)).filter(File.is_deleted == False).scalar() or 0
 
+        # Calculate average progress of active projects (where status != Completed and is_deleted == False)
+        avg_progress = db.session.query(func.avg(Project.progress_percentage)).filter(
+            Project.is_deleted == False,
+            Project.project_status != 'Completed'
+        ).scalar()
+        avg_progress = round(float(avg_progress), 2) if avg_progress is not None else 0.0
+
+        deleted_files = db.session.query(func.count(File.id)).filter(File.is_deleted == True).scalar() or 0
+
         return {
             "total_customers": total_customers,
             "total_leads": total_leads,
@@ -51,7 +60,10 @@ class DashboardService:
             "completed_projects": completed_projects,
             "pending_appointments": pending_appointments,
             "completed_appointments": completed_appointments,
-            "uploaded_files": uploaded_files
+            "uploaded_files": uploaded_files,
+            "deleted_files": deleted_files,
+            "average_project_progress": avg_progress,
+            "average_progress": avg_progress
         }
 
     @classmethod
@@ -104,14 +116,33 @@ class DashboardService:
             File.is_deleted == False
         ).scalar() or 0
 
+        active_files = uploaded_files
+
+        # Get active projects detailed list with progress percentage
+        active_projects_list = Project.query.filter(
+            Project.customer_id == customer_id,
+            Project.is_deleted == False,
+            Project.project_status != 'Completed'
+        ).all()
+        
+        active_projects_detail = [
+            {
+                "project_id": p.id,
+                "project_status": p.project_status,
+                "progress_percentage": int(p.progress_percentage)
+            } for p in active_projects_list
+        ]
+
         return {
             "customer_id": customer_id,
             "total_leads": total_leads,
             "total_quotations": total_quotations,
             "approved_quotations": approved_quotations,
             "active_projects": active_projects,
+            "active_projects_detail": active_projects_detail,
             "completed_projects": completed_projects,
             "total_notifications": total_notifications,
             "unread_notifications": unread_notifications,
-            "uploaded_files": uploaded_files
+            "uploaded_files": uploaded_files,
+            "active_files": active_files
         }

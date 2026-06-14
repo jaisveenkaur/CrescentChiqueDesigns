@@ -1,8 +1,10 @@
 import os
 import uuid
+from datetime import datetime, time
 from werkzeug.utils import secure_filename
 from flask import current_app
 from app.models import File
+from app.extensions import db
 
 class FileService:
     """Provides business logic validations for file uploads, checking formats, sizes, and naming controls."""
@@ -112,6 +114,23 @@ class FileService:
         if filename:
             query = query.filter(File.filename.ilike(f"%{filename}%"))
             
+        uploaded_after = filters.get('uploaded_after')
+        if uploaded_after:
+            try:
+                dt_after = datetime.strptime(uploaded_after, "%Y-%m-%d")
+            except (ValueError, TypeError):
+                raise ValueError("uploaded_after must be in YYYY-MM-DD format")
+            query = query.filter(File.uploaded_at >= dt_after)
+            
+        uploaded_before = filters.get('uploaded_before')
+        if uploaded_before:
+            try:
+                dt_before = datetime.strptime(uploaded_before, "%Y-%m-%d")
+                dt_before_end = datetime.combine(dt_before.date(), time.max)
+            except (ValueError, TypeError):
+                raise ValueError("uploaded_before must be in YYYY-MM-DD format")
+            query = query.filter(File.uploaded_at <= dt_before_end)
+            
         # Execute paginated query
         total = query.count()
         offset = (page - 1) * per_page
@@ -125,3 +144,73 @@ class FileService:
             "pages": pages,
             "items": items
         }
+
+    @classmethod
+    def download_file(cls, file_id, user_role, customer_id):
+        """Verifies file record and checks permissions to return absolute file destination path.
+        
+        Raises ValueError, PermissionError, or FileNotFoundError.
+        """
+        file_record = File.query.filter_by(id=file_id, is_deleted=False).first()
+        if not file_record:
+            raise ValueError("File record not found")
+            
+        # Permission check
+        if user_role != 'admin':
+            if not customer_id or file_record.customer_id != customer_id:
+                raise PermissionError("Unauthorized access to file")
+                
+        # Physical path resolution
+        # file_url is e.g. "/static/uploads/<uuid>.<ext>"
+        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+        filename = os.path.basename(file_record.file_url)
+        filepath = os.path.join(upload_folder, filename)
+        
+        if not os.path.exists(filepath):
+            raise FileNotFoundError("Physical file missing")
+            
+        return filepath
+
+    @classmethod
+    def soft_delete_file(cls, file_id, user_role, customer_id):
+        """Logically marks the file record as soft-deleted after validating privileges.
+        
+        Raises ValueError or PermissionError.
+        """
+        file_record = File.query.filter_by(id=file_id).first()
+        if not file_record:
+            raise ValueError("File record not found")
+            
+        if file_record.is_deleted:
+            raise ValueError("File record is already soft-deleted")
+            
+        # Permission check
+        if user_role != 'admin':
+            if not customer_id or file_record.customer_id != customer_id:
+                raise PermissionError("Unauthorized delete access")
+                
+        file_record.is_deleted = True
+        file_record.deleted_at = datetime.utcnow()
+        db.session.commit()
+        return file_record
+
+    @classmethod
+    def restore_file(cls, file_id, user_role):
+        """Recovers a logically soft-deleted file record back to active state (Admin only).
+        
+        Raises ValueError or PermissionError.
+        """
+        if user_role != 'admin':
+            raise PermissionError("Admin privilege required")
+            
+        file_record = File.query.filter_by(id=file_id).first()
+        if not file_record:
+            raise ValueError("File record not found")
+            
+        if not file_record.is_deleted:
+            raise ValueError("File record is not soft-deleted")
+            
+        file_record.is_deleted = False
+        file_record.deleted_at = None
+        db.session.commit()
+        return file_record

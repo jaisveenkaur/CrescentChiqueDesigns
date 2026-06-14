@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from flask_login import login_required, current_user
 from functools import wraps
 from app.extensions import db
@@ -86,7 +86,9 @@ def get_files():
     
     filters = {
         'file_type': request.args.get('file_type'),
-        'filename': request.args.get('filename')
+        'filename': request.args.get('filename'),
+        'uploaded_after': request.args.get('uploaded_after'),
+        'uploaded_before': request.args.get('uploaded_before')
     }
     
     try:
@@ -143,16 +145,62 @@ def get_file_details(file_id):
     }), 200
 
 
-@files_bp.route('/<string:file_id>', methods=['DELETE'])
+@files_bp.route('/<string:file_id>/download', methods=['GET'])
 @login_required
-@admin_required
-def delete_file(file_id):
-    """Soft deletes a file record logically from system operations (Admin only)."""
+def download_file(file_id):
+    """Downloads the actual file from server storage, verifying role/ownership rules."""
+    customer_id = current_user.customer.id if (current_user.role == 'customer' and current_user.customer) else None
     try:
-        SoftDeleteService.soft_delete_record(File, file_id)
-        return jsonify({"message": "File deleted successfully"}), 200
+        filepath = FileService.download_file(
+            file_id=file_id,
+            user_role=current_user.role,
+            customer_id=customer_id
+        )
+        
+        # Audit logging
+        AuditService.log(
+            user_id=current_user.id,
+            action="File Downloaded",
+            details=f"File ID {file_id} downloaded by user {current_user.email}"
+        )
+        
+        return send_file(filepath)
+        
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to download file: {str(e)}"}), 500
+
+
+@files_bp.route('/<string:file_id>', methods=['DELETE'])
+@login_required
+def delete_file(file_id):
+    """Soft deletes a file record logically from system operations."""
+    customer_id = current_user.customer.id if (current_user.role == 'customer' and current_user.customer) else None
+    try:
+        FileService.soft_delete_file(
+            file_id=file_id,
+            user_role=current_user.role,
+            customer_id=customer_id
+        )
+        
+        # Audit logging
+        AuditService.log(
+            user_id=current_user.id,
+            action="File Deleted",
+            details=f"File ID {file_id} soft-deleted by user {current_user.email}"
+        )
+        
+        return jsonify({"message": "File deleted successfully"}), 200
+        
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
     except Exception as e:
         return jsonify({"error": f"Failed to delete file: {str(e)}"}), 500
 
@@ -163,9 +211,23 @@ def delete_file(file_id):
 def restore_file(file_id):
     """Recovers a logically soft-deleted file record back to active operations (Admin only)."""
     try:
-        SoftDeleteService.restore_record(File, file_id)
+        FileService.restore_file(
+            file_id=file_id,
+            user_role=current_user.role
+        )
+        
+        # Audit logging
+        AuditService.log(
+            user_id=current_user.id,
+            action="File Restored",
+            details=f"File ID {file_id} restored by admin {current_user.email}"
+        )
+        
         return jsonify({"message": "File restored successfully"}), 200
+        
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
     except Exception as e:
         return jsonify({"error": f"Failed to restore file: {str(e)}"}), 500

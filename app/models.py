@@ -163,20 +163,30 @@ class Project(UUIDBase):
     customer_id = Column(String(36), ForeignKey('customers.id', ondelete='RESTRICT', onupdate='CASCADE'), nullable=False)
     quotation_id = Column(String(36), ForeignKey('quotations.id', ondelete='RESTRICT', onupdate='CASCADE'), nullable=False, unique=True)
     project_status = Column(String(50), nullable=False, default='Lead Created')
-    progress_percentage = Column(DECIMAL(5, 2), nullable=False, default=0.00)
+    progress_percentage = Column(Integer, nullable=False, default=0)
     start_date = Column(Date, nullable=True)
     expected_completion = Column(Date, nullable=True)
     
     # Relationships
     customer = relationship('Customer', back_populates='projects')
     quotation = relationship('Quotation', back_populates='project')
+    notes = relationship('ProjectNote', back_populates='project', cascade="all, delete-orphan")
 
     @validates('progress_percentage')
     def validate_progress(self, key, value):
-        val = Decimal(value)
+        if value is None:
+            raise ValueError("Progress percentage cannot be None")
+        if isinstance(value, bool):
+            raise ValueError("Progress percentage must be a valid integer")
+        try:
+            val = int(value)
+            if float(value) != val:
+                raise ValueError("Progress percentage must be a valid integer")
+        except (ValueError, TypeError):
+            raise ValueError("Progress percentage must be a valid integer")
         if val < 0 or val > 100:
             raise ValueError("Progress percentage must be between 0 and 100")
-        return value
+        return val
 
 
 class Lead(UUIDBase):
@@ -239,4 +249,17 @@ class AuditLog(UUIDBase):
     
     # Relationships
     user = relationship('User', back_populates='audit_logs')
+
+
+class ProjectNote(UUIDBase):
+    """Log tracking project notes entered by administrators."""
+    __tablename__ = 'project_notes'
+    
+    project_id = Column(String(36), ForeignKey('projects.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    note = Column(String(2000), nullable=False)
+    created_by = Column(String(36), ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    
+    # Relationships
+    project = relationship('Project', back_populates='notes')
+    creator = relationship('User')
 
