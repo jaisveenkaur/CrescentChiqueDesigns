@@ -4,6 +4,7 @@ from functools import wraps
 from app.extensions import db
 from app.models import Project
 from app.services.project_service import ProjectService
+from app.services.soft_delete_service import SoftDeleteService
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -139,3 +140,31 @@ def update_project_status(project_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to update project status: {str(e)}"}), 500
+
+
+@projects_bp.route('/<string:project_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def delete_project(project_id):
+    """Soft deletes a project record logically from system operations (Admin only)."""
+    try:
+        SoftDeleteService.soft_delete_record(Project, project_id)
+        return jsonify({"message": "Project deleted successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete project: {str(e)}"}), 500
+
+
+@projects_bp.route('/<string:project_id>/restore', methods=['PUT'])
+@login_required
+@admin_required
+def restore_project(project_id):
+    """Recovers a logically soft-deleted project record back to active operations (Admin only)."""
+    try:
+        SoftDeleteService.restore_record(Project, project_id)
+        return jsonify({"message": "Project restored successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to restore project: {str(e)}"}), 500

@@ -1,10 +1,21 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
+from functools import wraps
 from app.extensions import db
 from app.models import Quotation
 from app.services.quotation_service import QuotationService
+from app.services.soft_delete_service import SoftDeleteService
 
 quotations_bp = Blueprint('quotations', __name__)
+
+def admin_required(f):
+    """Decorator to restrict view access to Administrator roles only."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            return jsonify({"error": "Admin privilege required"}), 403
+        return f(*args, **kwargs)
+    return decorated_function
 
 @quotations_bp.route('/generate', methods=['POST'])
 def generate_quotation():
@@ -178,3 +189,31 @@ def get_quotation_details(quotation_id):
         "created_at": quotation.created_at.isoformat()
     }
     return jsonify(response), 200
+
+
+@quotations_bp.route('/<string:quotation_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def delete_quotation(quotation_id):
+    """Soft deletes a quotation record logically from system operations (Admin only)."""
+    try:
+        SoftDeleteService.soft_delete_record(Quotation, quotation_id)
+        return jsonify({"message": "Quotation deleted successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete quotation: {str(e)}"}), 500
+
+
+@quotations_bp.route('/<string:quotation_id>/restore', methods=['PUT'])
+@login_required
+@admin_required
+def restore_quotation(quotation_id):
+    """Recovers a logically soft-deleted quotation record back to active operations (Admin only)."""
+    try:
+        SoftDeleteService.restore_record(Quotation, quotation_id)
+        return jsonify({"message": "Quotation restored successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to restore quotation: {str(e)}"}), 500

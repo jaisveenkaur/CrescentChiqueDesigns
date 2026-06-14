@@ -4,6 +4,7 @@ from functools import wraps
 from app.extensions import db
 from app.models import Lead
 from app.services.lead_service import LeadService
+from app.services.soft_delete_service import SoftDeleteService
 
 leads_bp = Blueprint('leads', __name__)
 
@@ -191,3 +192,31 @@ def update_lead_status(lead_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to update lead status: {str(e)}"}), 500
+
+
+@leads_bp.route('/<string:lead_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def delete_lead(lead_id):
+    """Soft deletes a lead record logically from system operations (Admin only)."""
+    try:
+        SoftDeleteService.soft_delete_record(Lead, lead_id)
+        return jsonify({"message": "Lead deleted successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete lead: {str(e)}"}), 500
+
+
+@leads_bp.route('/<string:lead_id>/restore', methods=['PUT'])
+@login_required
+@admin_required
+def restore_lead(lead_id):
+    """Recovers a logically soft-deleted lead record back to active operations (Admin only)."""
+    try:
+        SoftDeleteService.restore_record(Lead, lead_id)
+        return jsonify({"message": "Lead restored successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to restore lead: {str(e)}"}), 500

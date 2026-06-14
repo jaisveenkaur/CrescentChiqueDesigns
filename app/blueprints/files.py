@@ -1,10 +1,21 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
+from functools import wraps
 from app.extensions import db
 from app.models import File
 from app.services.file_service import FileService
+from app.services.soft_delete_service import SoftDeleteService
 
 files_bp = Blueprint('files', __name__)
+
+def admin_required(f):
+    """Decorator to restrict view access to Administrator roles only."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            return jsonify({"error": "Admin privilege required"}), 403
+        return f(*args, **kwargs)
+    return decorated_function
 
 @files_bp.route('/upload', methods=['POST'])
 @login_required
@@ -121,3 +132,31 @@ def get_file_details(file_id):
         "file_type": file_record.file_type,
         "uploaded_at": file_record.uploaded_at.isoformat()
     }), 200
+
+
+@files_bp.route('/<string:file_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def delete_file(file_id):
+    """Soft deletes a file record logically from system operations (Admin only)."""
+    try:
+        SoftDeleteService.soft_delete_record(File, file_id)
+        return jsonify({"message": "File deleted successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete file: {str(e)}"}), 500
+
+
+@files_bp.route('/<string:file_id>/restore', methods=['PUT'])
+@login_required
+@admin_required
+def restore_file(file_id):
+    """Recovers a logically soft-deleted file record back to active operations (Admin only)."""
+    try:
+        SoftDeleteService.restore_record(File, file_id)
+        return jsonify({"message": "File restored successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Failed to restore file: {str(e)}"}), 500
