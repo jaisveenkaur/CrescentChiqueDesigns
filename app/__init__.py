@@ -23,11 +23,17 @@ def create_app(config_name=None):
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
     
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import jsonify
+        return jsonify({"error": "Authentication required. Please login."}), 401
+        
     @login_manager.user_loader
     def load_user(user_id):
         # Local import to prevent circular dependency lookup issues
         from app.models import User
         return User.query.get(user_id)
+
 
     # Import and register Blueprints
     from app.blueprints.auth import auth_bp
@@ -40,6 +46,7 @@ def create_app(config_name=None):
     from app.blueprints.leads import leads_bp
     from app.blueprints.dashboard import dashboard_bp
     from app.blueprints.audit_logs import audit_logs_bp
+    from app.blueprints.timeline import timeline_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(designs_bp, url_prefix='/api/v1/designs')
@@ -51,6 +58,8 @@ def create_app(config_name=None):
     app.register_blueprint(leads_bp, url_prefix='/api/v1/leads')
     app.register_blueprint(dashboard_bp, url_prefix='/api/v1/dashboard')
     app.register_blueprint(audit_logs_bp, url_prefix='/api/v1/audit-logs')
+    app.register_blueprint(timeline_bp, url_prefix='/api/v1/timeline')
+
 
     @app.route("/")
     def home():

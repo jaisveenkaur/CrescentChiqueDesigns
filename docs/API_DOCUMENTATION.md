@@ -17,8 +17,10 @@ Welcome to the developer-facing API documentation for the Crescent Chique Design
 10. [Dashboard Analytics](#dashboard-analytics)
 11. [Audit Logs](#audit-logs)
 12. [Email Notifications](#email-notifications)
-13. [Search & Pagination Reference](#search--pagination-reference)
-14. [Error Handling Reference](#error-handling-reference)
+13. [Customer Timeline](#customer-timeline)
+14. [Search & Pagination Reference](#search--pagination-reference)
+15. [Error Handling Reference](#error-handling-reference)
+
 
 
 ---
@@ -1128,6 +1130,39 @@ If SMTP connection failures occur, the transactional endpoint will **not** rollb
 - Stderr prints the execution stack trace safely.
 - A system failure is recorded in the `AuditLog` table with action classification `"Email Failed"`.
 - Successful dispatches are recorded as `"Email Sent"`.
+
+---
+
+## Customer Timeline
+
+### Get Customer Activity Timeline
+* **Method**: `GET`
+* **URL**: `/api/v1/timeline`
+* **Purpose**: Fetches a chronological list of all major activities across Leads, Appointments, Quotations, Projects, Notifications, and Files associated with the logged-in customer.
+* **Authorization**: Customer
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "total_events": 2,
+    "items": [
+      {
+        "type": "appointment",
+        "title": "Appointment Booked",
+        "description": "Consultation scheduled for 2026-07-10 14:00:00 (Status: pending)",
+        "created_at": "2026-06-14T19:15:00"
+      },
+      {
+        "type": "lead",
+        "title": "Lead Submitted",
+        "description": "Complete kitchen remodeling project request",
+        "created_at": "2026-06-14T19:10:00"
+      }
+    ]
+  }
+  ```
+* **Error Responses**:
+  - `401 Unauthorized`: Session not active.
+  - `403 Forbidden`: Authenticated user is not a customer or does not have a customer profile.
 
 ---
 
