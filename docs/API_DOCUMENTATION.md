@@ -584,8 +584,8 @@ All stateful session authentication is managed via session cookies tracked using
   - `page` (default: 1)
   - `per_page` (default: 10)
   - `project_status` (exact match: `Lead Created`, `Quotation Approved`, `Design Finalized`, `Procurement`, `Execution`, `Quality Check`, `Completed`)
-  - `min_progress` (decimal value 0-100)
-  - `max_progress` (decimal value 0-100)
+  - `min_progress` (integer value 0-100)
+  - `max_progress` (integer value 0-100)
 * **Success Response (200 OK)**:
   ```json
   {
@@ -599,7 +599,7 @@ All stateful session authentication is managed via session cookies tracked using
         "customer_id": "e81f1810-74be-4f40-b302-39048aabc499",
         "quotation_id": "e421d0f2-dbda-417b-84eb-6660b7293eb4",
         "project_status": "Execution",
-        "progress_percentage": 45.0,
+        "progress_percentage": 45,
         "start_date": "2026-06-01",
         "expected_completion": "2026-08-15"
       }
@@ -619,7 +619,7 @@ All stateful session authentication is managed via session cookies tracked using
     "customer_id": "e81f1810-74be-4f40-b302-39048aabc499",
     "quotation_id": "e421d0f2-dbda-417b-84eb-6660b7293eb4",
     "project_status": "Execution",
-    "progress_percentage": 45.0,
+    "progress_percentage": 45,
     "start_date": "2026-06-01",
     "expected_completion": "2026-08-15",
     "created_at": "2026-06-14T15:20:00"
@@ -638,7 +638,7 @@ All stateful session authentication is managed via session cookies tracked using
   ```json
   {
     "project_status": "Execution",
-    "progress_percentage": 50.0
+    "progress_percentage": 50
   }
   ```
 * **Success Response (200 OK)**:
@@ -648,7 +648,7 @@ All stateful session authentication is managed via session cookies tracked using
     "project": {
       "id": "e256ea9b-3ab1-4356-aea9-6e4ead0d2a79",
       "project_status": "Execution",
-      "progress_percentage": 50.0
+      "progress_percentage": 50
     }
   }
   ```
@@ -656,6 +656,73 @@ All stateful session authentication is managed via session cookies tracked using
   - `400 Bad Request`: Progress out of range (0-100) or invalid status.
   - `403 Forbidden`: Admin privilege required.
   - `404 Not Found`: Project tracker not found.
+
+### Update Project Progress (Admin Only)
+* **Method**: `PUT`
+* **URL**: `/api/v1/projects/<id>/progress`
+* **Purpose**: Updates the progress percentage of a project.
+* **Authorization**: Admin
+* **Request Body**:
+  ```json
+  {
+    "progress_percentage": 75
+  }
+  ```
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Progress updated successfully"
+  }
+  ```
+* **Error Responses**:
+  - `400 Bad Request`: Progress out of range (0-100) or not an integer.
+  - `403 Forbidden`: Admin privilege required.
+  - `404 Not Found`: Project tracker not found.
+
+### Add Project Note (Admin Only)
+* **Method**: `POST`
+* **URL**: `/api/v1/projects/<id>/notes`
+* **Purpose**: Records a status update or log entry for the specified project.
+* **Authorization**: Admin
+* **Request Body**:
+  ```json
+  {
+    "note": "Kitchen layout finalized"
+  }
+  ```
+* **Success Response (201 Created)**:
+  ```json
+  {
+    "message": "Project note added successfully",
+    "note": {
+      "id": "note-uuid",
+      "note": "Kitchen layout finalized",
+      "created_at": "2026-06-14T20:57:35"
+    }
+  }
+  ```
+* **Error Responses**:
+  - `400 Bad Request`: Note is missing, empty, or exceeds 2000 characters.
+  - `403 Forbidden`: Admin privilege required.
+  - `404 Not Found`: Project not found.
+
+### Get Project Notes
+* **Method**: `GET`
+* **URL**: `/api/v1/projects/<id>/notes`
+* **Purpose**: Retrieves all logged progress updates and notes for a project.
+* **Authorization**: Customer (project owner only) / Admin
+* **Success Response (200 OK)**:
+  ```json
+  [
+    {
+      "note": "Kitchen layout finalized",
+      "created_at": "2026-06-14T20:57:35"
+    }
+  ]
+  ```
+* **Error Responses**:
+  - `403 Forbidden`: Unauthorized view access.
+  - `404 Not Found`: Project not found.
 
 ### Soft Delete Project
 * **Method**: `DELETE`
@@ -789,6 +856,8 @@ Allowed extensions are `pdf`, `png`, `jpg`, and `jpeg`. The maximum allowed file
   - `per_page` (default: 10)
   - `file_type` (exact extension, e.g., `pdf`, `png`)
   - `filename` (partial match search string)
+  - `uploaded_after` (inclusive, YYYY-MM-DD format)
+  - `uploaded_before` (inclusive, YYYY-MM-DD format)
 * **Success Response (200 OK)**:
   ```json
   {
@@ -826,11 +895,22 @@ Allowed extensions are `pdf`, `png`, `jpg`, and `jpeg`. The maximum allowed file
   }
   ```
 
+### Download File
+* **Method**: `GET`
+* **URL**: `/api/v1/files/<id>/download`
+* **Purpose**: Downloads the physical file from server storage.
+* **Authorization**: Customer (owning profile only) / Admin
+* **Success Response (200 OK)**:
+  Binary stream containing the requested file.
+* **Error Responses**:
+  - `403 Forbidden`: Unauthorized download access.
+  - `404 Not Found`: File record not found or physical file missing.
+
 ### Soft Delete File
 * **Method**: `DELETE`
 * **URL**: `/api/v1/files/<id>`
 * **Purpose**: Logically soft deletes a file record.
-* **Authorization**: Admin
+* **Authorization**: Customer (owning profile only) / Admin
 * **Success Response (200 OK)**:
   ```json
   {
@@ -838,7 +918,7 @@ Allowed extensions are `pdf`, `png`, `jpg`, and `jpeg`. The maximum allowed file
   }
   ```
 * **Error Responses**:
-  - `403 Forbidden`: Admin privilege required.
+  - `403 Forbidden`: Unauthorized delete access.
   - `404 Not Found`: File not found or already deleted.
 
 ### Restore File
@@ -1024,7 +1104,9 @@ Allowed extensions are `pdf`, `png`, `jpg`, and `jpeg`. The maximum allowed file
     "total_customers": 1,
     "total_leads": 2,
     "total_quotations": 1,
-    "uploaded_files": 1
+    "uploaded_files": 1,
+    "deleted_files": 0,
+    "average_project_progress": 45.0
   }
   ```
 * **Error Responses**:
@@ -1039,6 +1121,13 @@ Allowed extensions are `pdf`, `png`, `jpg`, and `jpeg`. The maximum allowed file
   ```json
   {
     "active_projects": 1,
+    "active_projects_detail": [
+      {
+        "project_id": "e256ea9b-3ab1-4356-aea9-6e4ead0d2a79",
+        "project_status": "Execution",
+        "progress_percentage": 45
+      }
+    ],
     "approved_quotations": 1,
     "completed_projects": 0,
     "customer_id": "3a31b18e-4ce5-4e90-af18-41e489aac404",
@@ -1046,7 +1135,8 @@ Allowed extensions are `pdf`, `png`, `jpg`, and `jpeg`. The maximum allowed file
     "total_notifications": 1,
     "total_quotations": 1,
     "unread_notifications": 1,
-    "uploaded_files": 1
+    "uploaded_files": 1,
+    "active_files": 1
   }
   ```
 * **Error Responses**:

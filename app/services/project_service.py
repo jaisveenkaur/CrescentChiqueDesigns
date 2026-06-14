@@ -40,25 +40,39 @@ class ProjectService:
         return page, per_page
 
     @classmethod
+    def validate_progress_percentage(cls, value):
+        """Validates that progress_percentage is an integer between 0 and 100.
+        
+        Returns the validated integer.
+        Raises ValueError if validation fails.
+        """
+        if value is None:
+            raise ValueError("progress_percentage cannot be None")
+        if isinstance(value, bool):
+            raise ValueError("progress_percentage must be a valid integer")
+        try:
+            val = int(value)
+            if float(value) != val:
+                raise ValueError("progress_percentage must be a valid integer")
+        except (ValueError, TypeError):
+            raise ValueError("progress_percentage must be a valid integer")
+            
+        if val < 0 or val > 100:
+            raise ValueError("progress_percentage must be between 0 and 100")
+        return val
+
+    @classmethod
     def validate_project_update(cls, status, progress):
         """Checks if status string matches valid statuses, and filters progress bounds.
         
-        Returns validated (status, progress_decimal).
+        Returns validated (status, progress_integer).
         Raises ValueError if validations fail.
         """
         # Validate status configuration values
         if status not in cls.VALID_STATUSES:
             raise ValueError(f"Invalid project status. Must be one of: {list(cls.VALID_STATUSES)}")
             
-        # Validate progress decimal inputs
-        try:
-            prog = Decimal(str(progress))
-        except (ValueError, TypeError):
-            raise ValueError("progress_percentage must be a valid number")
-            
-        if prog < 0 or prog > 100:
-            raise ValueError("progress_percentage must be between 0 and 100")
-            
+        prog = cls.validate_progress_percentage(progress)
         return status, prog
 
     @classmethod
@@ -88,21 +102,25 @@ class ProjectService:
         min_progress = filters.get('min_progress')
         if min_progress is not None:
             try:
-                min_prog = Decimal(str(min_progress))
+                min_prog = int(min_progress)
+                if float(min_progress) != min_prog:
+                    raise ValueError("min_progress must be a valid integer")
                 if min_prog < 0 or min_prog > 100:
                     raise ValueError("min_progress must be between 0 and 100")
             except (ValueError, TypeError):
-                raise ValueError("min_progress must be a valid number")
+                raise ValueError("min_progress must be a valid integer")
             query = query.filter(Project.progress_percentage >= min_prog)
             
         max_progress = filters.get('max_progress')
         if max_progress is not None:
             try:
-                max_prog = Decimal(str(max_progress))
+                max_prog = int(max_progress)
+                if float(max_progress) != max_prog:
+                    raise ValueError("max_progress must be a valid integer")
                 if max_prog < 0 or max_prog > 100:
                     raise ValueError("max_progress must be between 0 and 100")
             except (ValueError, TypeError):
-                raise ValueError("max_progress must be a valid number")
+                raise ValueError("max_progress must be a valid integer")
             query = query.filter(Project.progress_percentage <= max_prog)
             
         # Execute paginated query

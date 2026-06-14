@@ -58,7 +58,7 @@ def get_projects():
             "customer_id": p.customer_id,
             "quotation_id": p.quotation_id,
             "project_status": p.project_status,
-            "progress_percentage": float(p.progress_percentage),
+            "progress_percentage": int(p.progress_percentage),
             "start_date": p.start_date.isoformat() if p.start_date else None,
             "expected_completion": p.expected_completion.isoformat() if p.expected_completion else None
         })
@@ -90,7 +90,7 @@ def get_project_details(project_id):
         "customer_id": project.customer_id,
         "quotation_id": project.quotation_id,
         "project_status": project.project_status,
-        "progress_percentage": float(project.progress_percentage),
+        "progress_percentage": int(project.progress_percentage),
         "start_date": project.start_date.isoformat() if project.start_date else None,
         "expected_completion": project.expected_completion.isoformat() if project.expected_completion else None,
         "created_at": project.created_at.isoformat()
@@ -142,13 +142,57 @@ def update_project_status(project_id):
             "project": {
                 "id": project.id,
                 "project_status": project.project_status,
-                "progress_percentage": float(project.progress_percentage)
+                "progress_percentage": int(project.progress_percentage)
             }
         }), 200
         
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to update project status: {str(e)}"}), 500
+
+
+@projects_bp.route('/<string:project_id>/progress', methods=['PUT'])
+@login_required
+@admin_required
+def update_project_progress(project_id):
+    """Updates only the progress percentage of a project (Admin only)."""
+    project = Project.query.filter_by(id=project_id, is_deleted=False).first()
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+        
+    data = request.get_json() or {}
+    if 'progress_percentage' not in data:
+        return jsonify({"error": "Missing required field: progress_percentage"}), 400
+        
+    progress = data['progress_percentage']
+    try:
+        val_progress = ProjectService.validate_progress_percentage(progress)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+        
+    try:
+        project.progress_percentage = val_progress
+        db.session.commit()
+        
+        # Audit logging
+        AuditService.log(
+            current_user.id,
+            "Project Progress Updated",
+            f"Project ID {project.id} progress updated to {project.progress_percentage}%"
+        )
+        
+        # Email Notification (send fail-safely)
+        try:
+            from app.services.email_service import EmailService
+            EmailService.send_project_status_update(project)
+        except Exception:
+            pass
+            
+        return jsonify({"message": "Progress updated successfully"}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update project progress: {str(e)}"}), 500
 
 
 @projects_bp.route('/<string:project_id>', methods=['DELETE'])

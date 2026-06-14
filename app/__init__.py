@@ -41,6 +41,7 @@ def create_app(config_name=None):
     from app.blueprints.appointments import appointments_bp
     from app.blueprints.quotations import quotations_bp
     from app.blueprints.projects import projects_bp
+    from app.blueprints.project_notes import project_notes_bp
     from app.blueprints.notifications import notifications_bp
     from app.blueprints.files import files_bp
     from app.blueprints.leads import leads_bp
@@ -53,6 +54,7 @@ def create_app(config_name=None):
     app.register_blueprint(appointments_bp, url_prefix='/api/v1/appointments')
     app.register_blueprint(quotations_bp, url_prefix='/api/v1/quotations')
     app.register_blueprint(projects_bp, url_prefix='/api/v1/projects')
+    app.register_blueprint(project_notes_bp, url_prefix='/api/v1/projects')
     app.register_blueprint(notifications_bp, url_prefix='/api/v1/notifications')
     app.register_blueprint(files_bp, url_prefix='/api/v1/files')
     app.register_blueprint(leads_bp, url_prefix='/api/v1/leads')
