@@ -36,6 +36,7 @@ def create_app(config_name=None):
     from app.blueprints.notifications import notifications_bp
     from app.blueprints.files import files_bp
     from app.blueprints.leads import leads_bp
+    from app.blueprints.dashboard import dashboard_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(designs_bp, url_prefix='/api/v1/designs')
@@ -45,6 +46,7 @@ def create_app(config_name=None):
     app.register_blueprint(notifications_bp, url_prefix='/api/v1/notifications')
     app.register_blueprint(files_bp, url_prefix='/api/v1/files')
     app.register_blueprint(leads_bp, url_prefix='/api/v1/leads')
+    app.register_blueprint(dashboard_bp, url_prefix='/api/v1/dashboard')
 
     @app.route("/")
     def home():
