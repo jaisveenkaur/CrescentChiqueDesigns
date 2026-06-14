@@ -7,15 +7,16 @@ Welcome to the developer-facing API documentation for the Crescent Chique Design
 ## Table of Contents
 1. [Authentication](#authentication)
 2. [Customers](#customers)
-3. [Appointments](#appointments)
-4. [Quotations](#quotations)
-5. [Projects](#projects)
-6. [Notifications](#notifications)
-7. [Files](#files)
-8. [Leads](#leads)
-9. [Dashboard Analytics](#dashboard-analytics)
-10. [Search & Pagination Reference](#search--pagination-reference)
-11. [Error Handling Reference](#error-handling-reference)
+3. [Designs](#designs)
+4. [Appointments](#appointments)
+5. [Quotations](#quotations)
+6. [Projects](#projects)
+7. [Notifications](#notifications)
+8. [Files](#files)
+9. [Leads](#leads)
+10. [Dashboard Analytics](#dashboard-analytics)
+11. [Search & Pagination Reference](#search--pagination-reference)
+12. [Error Handling Reference](#error-handling-reference)
 
 ---
 
@@ -43,9 +44,13 @@ All stateful session authentication is managed via session cookies tracked using
 * **Success Response (201 Created)**:
   ```json
   {
-    "message": "User registered and profile created successfully",
-    "user_id": "c76e2730-a8d6-4fe4-aa3c-23743fbfd293",
-    "customer_id": "e81f1810-74be-4f40-b302-39048aabc499"
+    "message": "User registered successfully",
+    "user": {
+      "id": "c76e2730-a8d6-4fe4-aa3c-23743fbfd293",
+      "name": "Sarah Connor",
+      "email": "sarah.connor@example.com",
+      "role": "customer"
+    }
   }
   ```
 * **Error Responses**:
@@ -87,7 +92,7 @@ All stateful session authentication is managed via session cookies tracked using
 * **Success Response (200 OK)**:
   ```json
   {
-    "message": "Logged out successfully"
+    "message": "Logout successful"
   }
   ```
 * **Error Responses**:
@@ -109,10 +114,41 @@ All stateful session authentication is managed via session cookies tracked using
     "name": "John Doe",
     "email": "john.doe@gmail.com",
     "role": "customer",
-    "customer_profile": {
+    "phone": "+919876543210",
+    "address": "Apartment 402, Sea Breeze Wing B, Worli",
+    "city": "Mumbai",
+    "state": "Maharashtra"
+  }
+  ```
+* **Error Responses**:
+  - `401 Unauthorized`: Authentication required.
+
+### Update Profile Details
+* **Method**: `PUT`
+* **URL**: `/api/v1/auth/profile`
+* **Purpose**: Modifies the authenticated user's name and/or customer profile details.
+* **Authorization**: Customer / Admin (Authenticated)
+* **Request Body**:
+  ```json
+  {
+    "name": "John Doe Updated",
+    "phone": "+919876543211",
+    "address": "New Flat 501",
+    "city": "Mumbai",
+    "state": "Maharashtra"
+  }
+  ```
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Profile updated successfully",
+    "user": {
       "id": "3a31b18e-4ce5-4e90-af18-41e489aac404",
-      "phone": "+919876543210",
-      "address": "Apartment 402, Sea Breeze Wing B, Worli",
+      "name": "John Doe Updated",
+      "email": "john.doe@gmail.com",
+      "role": "customer",
+      "phone": "+919876543211",
+      "address": "New Flat 501",
       "city": "Mumbai",
       "state": "Maharashtra"
     }
@@ -120,6 +156,143 @@ All stateful session authentication is managed via session cookies tracked using
   ```
 * **Error Responses**:
   - `401 Unauthorized`: Authentication required.
+  - `500 Internal Server Error`: Failed to update profile.
+
+---
+
+## Designs
+
+### List Designs Portfolio
+* **Method**: `GET`
+* **URL**: `/api/v1/designs`
+* **Purpose**: Fetches active design portfolio items, optionally filtered by style and room type.
+* **Authorization**: Public
+* **Query Parameters**:
+  - `style`: Filter by style (e.g. `Scandinavian`, `Industrial`)
+  - `room_type`: Filter by room layout (e.g. `Living Room`, `Kitchen`)
+* **Success Response (200 OK)**:
+  ```json
+  [
+    {
+      "id": "74be-4f40-b302-39048aabc101",
+      "title": "Minimalist Scandinavian Living Room",
+      "description": "Clean linear designs, natural timber highlights.",
+      "room_type": "Living Room",
+      "style": "Scandinavian",
+      "price_per_sqft": 250.0,
+      "image_url": "/static/images/portfolio/scandi_living_primary.jpg"
+    }
+  ]
+  ```
+
+### Get Design Details
+* **Method**: `GET`
+* **URL**: `/api/v1/designs/<id>`
+* **Purpose**: Fetches individual design details and all mapped sub-images.
+* **Authorization**: Public
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "id": "74be-4f40-b302-39048aabc101",
+    "title": "Minimalist Scandinavian Living Room",
+    "description": "Clean linear designs, natural timber highlights.",
+    "room_type": "Living Room",
+    "style": "Scandinavian",
+    "price_per_sqft": 250.0,
+    "image_url": "/static/images/portfolio/scandi_living_primary.jpg",
+    "sub_images": [
+      {
+        "id": "3a31b18e-4ce5-4e90-af18-41e489aac405",
+        "image_url": "/static/images/portfolio/scandi_living_primary.jpg",
+        "is_primary": true
+      }
+    ],
+    "created_at": "2026-06-14T15:20:00"
+  }
+  ```
+* **Error Responses**:
+  - `404 Not Found`: Design portfolio entry not found.
+
+### Create Design Portfolio Entry (Admin Only)
+* **Method**: `POST`
+* **URL**: `/api/v1/designs`
+* **Purpose**: Creates a new design portfolio item with primary and optional secondary images.
+* **Authorization**: Admin
+* **Request Body**:
+  ```json
+  {
+    "title": "Industrial Loft Bedroom",
+    "description": "Exposed brick walls and metallic accents.",
+    "room_type": "Bedroom",
+    "style": "Industrial",
+    "price_per_sqft": 300.00,
+    "image_url": "/static/images/portfolio/industrial_bed_primary.jpg",
+    "extra_images": [
+      "/static/images/portfolio/industrial_bed_detail1.jpg"
+    ]
+  }
+  ```
+* **Success Response (201 Created)**:
+  ```json
+  {
+    "message": "Design portfolio entry created successfully",
+    "design": {
+      "id": "74be-4f40-b302-39048aabc102",
+      "title": "Industrial Loft Bedroom",
+      "room_type": "Bedroom",
+      "style": "Industrial",
+      "price_per_sqft": 300.00
+    }
+  }
+  ```
+* **Error Responses**:
+  - `400 Bad Request`: Missing fields or invalid price.
+  - `403 Forbidden`: Admin privilege required.
+
+### Update Design Portfolio Entry (Admin Only)
+* **Method**: `PUT`
+* **URL**: `/api/v1/designs/<id>`
+* **Purpose**: Modifies an existing design portfolio record's attributes.
+* **Authorization**: Admin
+* **Request Body**:
+  ```json
+  {
+    "title": "Industrial Loft Bedroom Updated",
+    "price_per_sqft": 320.00
+  }
+  ```
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Design portfolio entry updated successfully",
+    "design": {
+      "id": "74be-4f40-b302-39048aabc102",
+      "title": "Industrial Loft Bedroom Updated",
+      "room_type": "Bedroom",
+      "style": "Industrial",
+      "price_per_sqft": 320.00
+    }
+  }
+  ```
+* **Error Responses**:
+  - `400 Bad Request`: Invalid parameters.
+  - `403 Forbidden`: Admin privilege required.
+  - `404 Not Found`: Design not found.
+
+### Delete Design Portfolio Entry (Admin Only)
+* **Method**: `DELETE`
+* **URL**: `/api/v1/designs/<id>`
+* **Purpose**: Soft deletes a design portfolio entry and all linked sub-images.
+* **Authorization**: Admin
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Design portfolio entry soft-deleted successfully"
+  }
+  ```
+* **Error Responses**:
+  - `403 Forbidden`: Admin privilege required.
+  - `404 Not Found`: Design not found.
 
 ---
 
@@ -523,6 +696,27 @@ All stateful session authentication is managed via session cookies tracked using
   ```
 * **Error Responses**:
   - `403 Forbidden`: Only registered customers can access notifications.
+
+### Get Notification Details
+* **Method**: `GET`
+* **URL**: `/api/v1/notifications/<id>`
+* **Purpose**: Retrieves full details of a single notification, validating customer ownership.
+* **Authorization**: Customer (owning alert)
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "id": "c1a2d0f2-dbda-417b-84eb-6660b7293eb9",
+    "customer_id": "e81f1810-74be-4f40-b302-39048aabc499",
+    "title": "Project Stage Updated",
+    "message": "Great news! Your living room project has successfully transitioned to the 'Execution' phase.",
+    "is_read": false,
+    "created_at": "2026-06-14T15:20:00",
+    "updated_at": "2026-06-14T15:20:00"
+  }
+  ```
+* **Error Responses**:
+  - `403 Forbidden`: Only registered customers can access notifications.
+  - `404 Not Found`: Notification not found.
 
 ### Mark Notification as Read
 * **Method**: `PUT`

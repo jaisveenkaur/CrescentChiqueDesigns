@@ -169,7 +169,12 @@ For detailed request/response payload examples, refer to [API_DOCUMENTATION.md](
 | | `POST` | `/api/v1/auth/login` | Login user session | Public |
 | | `POST` | `/api/v1/auth/logout` | Logout user session | Authenticated |
 | | `GET` | `/api/v1/auth/profile` | Retrieve profile metadata | Authenticated |
+| | `PUT` | `/api/v1/auth/profile` | Update profile metadata details | Authenticated |
 | **Designs** | `GET` | `/api/v1/designs` | Lists design portfolio | Public |
+| | `GET` | `/api/v1/designs/<id>` | Get design specifications | Public |
+| | `POST` | `/api/v1/designs` | Create design entry | Admin |
+| | `PUT` | `/api/v1/designs/<id>` | Update design details | Admin |
+| | `DELETE` | `/api/v1/designs/<id>` | Soft delete design entry | Admin |
 | **Appointments** | `POST` | `/api/v1/appointments` | Book consultation slot | Customer |
 | | `GET` | `/api/v1/appointments` | Lists appointments (Paginated) | Customer / Admin |
 | | `PUT` | `/api/v1/appointments/<id>/status` | Update booking status | Admin |
@@ -183,6 +188,9 @@ For detailed request/response payload examples, refer to [API_DOCUMENTATION.md](
 | | `PUT` | `/api/v1/projects/<id>/status` | Update progress & milestones | Admin |
 | | `DELETE` | `/api/v1/projects/<id>` | Soft delete project tracker | Admin |
 | | `PUT` | `/api/v1/projects/<id>/restore` | Restore project tracker | Admin |
+| **Notifications** | `GET` | `/api/v1/notifications` | Lists client alerts | Customer |
+| | `GET` | `/api/v1/notifications/<id>` | Get notification details | Customer |
+| | `PUT` | `/api/v1/notifications/<id>/read`| Mark alert as read | Customer |
 | **Files** | `POST` | `/api/v1/files/upload` | Upload PDF/image specifications | Customer |
 | | `GET` | `/api/v1/files` | Lists files metadata (Paginated) | Customer / Admin |
 | | `DELETE` | `/api/v1/files/<id>` | Soft delete file record | Admin |
