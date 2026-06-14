@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import wraps
 from app.extensions import db
 from app.models import Appointment, Customer
+from app.services.appointment_service import AppointmentService
 
 appointments_bp = Blueprint('appointments', __name__)
 
@@ -78,20 +79,37 @@ def create_appointment():
 @appointments_bp.route('', methods=['GET'])
 @login_required
 def get_appointments():
-    """Lists appointments depending on role authorization (admins see all, customers see their own)."""
-    if current_user.role == 'admin':
-        appointments = Appointment.query.filter_by(is_deleted=False).all()
-    elif current_user.role == 'customer' and current_user.customer:
-        appointments = Appointment.query.filter_by(
-            customer_id=current_user.customer.id, 
-            is_deleted=False
-        ).all()
-    else:
+    """Lists appointments depending on role authorization with search, filtering and pagination support."""
+    customer_id = None
+    if current_user.role == 'customer':
+        if not current_user.customer:
+            return jsonify({"error": "Customer profile not found or inactive"}), 403
+        customer_id = current_user.customer.id
+    elif current_user.role != 'admin':
         return jsonify({"error": "Unauthorized role access"}), 403
         
-    response = []
-    for a in appointments:
-        response.append({
+    page_param = request.args.get('page')
+    per_page_param = request.args.get('per_page')
+    
+    filters = {
+        'status': request.args.get('status'),
+        'appointment_date': request.args.get('appointment_date')
+    }
+    
+    try:
+        results = AppointmentService.search_appointments(
+            user_role=current_user.role,
+            customer_id=customer_id,
+            filters=filters,
+            page_param=page_param,
+            per_page_param=per_page_param
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+        
+    response_items = []
+    for a in results["items"]:
+        response_items.append({
             "id": a.id,
             "customer_id": a.customer_id,
             "appointment_date": a.appointment_date.isoformat(),
@@ -100,7 +118,14 @@ def get_appointments():
             "requirements": a.requirements,
             "floor_plan_url": a.floor_plan_url
         })
-    return jsonify(response), 200
+        
+    return jsonify({
+        "page": results["page"],
+        "per_page": results["per_page"],
+        "total": results["total"],
+        "pages": results["pages"],
+        "items": response_items
+    }), 200
 
 
 @appointments_bp.route('/<string:appointment_id>/status', methods=['PUT'])
