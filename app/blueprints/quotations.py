@@ -97,20 +97,38 @@ def save_quotation():
 @quotations_bp.route('', methods=['GET'])
 @login_required
 def get_quotations():
-    """Lists quotations depending on user authorization (admins see all, customers see their own)."""
-    if current_user.role == 'admin':
-        quotations = Quotation.query.filter_by(is_deleted=False).all()
-    elif current_user.role == 'customer' and current_user.customer:
-        quotations = Quotation.query.filter_by(
-            customer_id=current_user.customer.id,
-            is_deleted=False
-        ).all()
-    else:
+    """Lists quotations depending on user authorization with search, filtering and pagination support."""
+    customer_id = None
+    if current_user.role == 'customer':
+        if not current_user.customer:
+            return jsonify({"error": "Customer profile not found or inactive"}), 403
+        customer_id = current_user.customer.id
+    elif current_user.role != 'admin':
         return jsonify({"error": "Unauthorized role access"}), 403
         
-    response = []
-    for q in quotations:
-        response.append({
+    page_param = request.args.get('page')
+    per_page_param = request.args.get('per_page')
+    
+    filters = {
+        'material_grade': request.args.get('material_grade'),
+        'min_amount': request.args.get('min_amount'),
+        'max_amount': request.args.get('max_amount')
+    }
+    
+    try:
+        results = QuotationService.search_quotations(
+            user_role=current_user.role,
+            customer_id=customer_id,
+            filters=filters,
+            page_param=page_param,
+            per_page_param=per_page_param
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+        
+    response_items = []
+    for q in results["items"]:
+        response_items.append({
             "id": q.id,
             "customer_id": q.customer_id,
             "design_id": q.design_id,
@@ -123,7 +141,14 @@ def get_quotations():
             "total_amount": float(q.total_amount),
             "created_at": q.created_at.isoformat()
         })
-    return jsonify(response), 200
+        
+    return jsonify({
+        "page": results["page"],
+        "per_page": results["per_page"],
+        "total": results["total"],
+        "pages": results["pages"],
+        "items": response_items
+    }), 200
 
 
 @quotations_bp.route('/<string:quotation_id>', methods=['GET'])

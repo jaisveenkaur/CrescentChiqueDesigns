@@ -20,28 +20,54 @@ def admin_required(f):
 @projects_bp.route('', methods=['GET'])
 @login_required
 def get_projects():
-    """Fetches non-deleted project entries filterable by role attributes (admins see all, customers see own)."""
-    if current_user.role == 'admin':
-        projects = Project.query.filter_by(is_deleted=False).all()
-    elif current_user.role == 'customer' and current_user.customer:
-        projects = Project.query.filter_by(
-            customer_id=current_user.customer.id, 
-            is_deleted=False
-        ).all()
-    else:
+    """Fetches non-deleted project entries with search, filtering and pagination support."""
+    customer_id = None
+    if current_user.role == 'customer':
+        if not current_user.customer:
+            return jsonify({"error": "Customer profile not found or inactive"}), 403
+        customer_id = current_user.customer.id
+    elif current_user.role != 'admin':
         return jsonify({"error": "Unauthorized role access"}), 403
         
-    response = []
-    for p in projects:
-        response.append({
+    page_param = request.args.get('page')
+    per_page_param = request.args.get('per_page')
+    
+    filters = {
+        'project_status': request.args.get('project_status'),
+        'min_progress': request.args.get('min_progress'),
+        'max_progress': request.args.get('max_progress')
+    }
+    
+    try:
+        results = ProjectService.search_projects(
+            user_role=current_user.role,
+            customer_id=customer_id,
+            filters=filters,
+            page_param=page_param,
+            per_page_param=per_page_param
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+        
+    response_items = []
+    for p in results["items"]:
+        response_items.append({
             "id": p.id,
+            "customer_id": p.customer_id,
             "quotation_id": p.quotation_id,
             "project_status": p.project_status,
             "progress_percentage": float(p.progress_percentage),
             "start_date": p.start_date.isoformat() if p.start_date else None,
             "expected_completion": p.expected_completion.isoformat() if p.expected_completion else None
         })
-    return jsonify(response), 200
+        
+    return jsonify({
+        "page": results["page"],
+        "per_page": results["per_page"],
+        "total": results["total"],
+        "pages": results["pages"],
+        "items": response_items
+    }), 200
 
 
 @projects_bp.route('/<string:project_id>', methods=['GET'])

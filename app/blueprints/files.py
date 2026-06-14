@@ -52,20 +52,37 @@ def upload_file():
 @files_bp.route('', methods=['GET'])
 @login_required
 def get_files():
-    """Lists files according to user role (admins see all files, customers see only their own uploads)."""
-    if current_user.role == 'admin':
-        files = File.query.filter_by(is_deleted=False).all()
-    elif current_user.role == 'customer' and current_user.customer:
-        files = File.query.filter_by(
-            customer_id=current_user.customer.id, 
-            is_deleted=False
-        ).all()
-    else:
+    """Lists files according to user role with search, filtering and pagination support."""
+    customer_id = None
+    if current_user.role == 'customer':
+        if not current_user.customer:
+            return jsonify({"error": "Customer profile not found or inactive"}), 403
+        customer_id = current_user.customer.id
+    elif current_user.role != 'admin':
         return jsonify({"error": "Unauthorized role access"}), 403
         
-    response = []
-    for f in files:
-        response.append({
+    page_param = request.args.get('page')
+    per_page_param = request.args.get('per_page')
+    
+    filters = {
+        'file_type': request.args.get('file_type'),
+        'filename': request.args.get('filename')
+    }
+    
+    try:
+        results = FileService.search_files(
+            user_role=current_user.role,
+            customer_id=customer_id,
+            filters=filters,
+            page_param=page_param,
+            per_page_param=per_page_param
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+        
+    response_items = []
+    for f in results["items"]:
+        response_items.append({
             "id": f.id,
             "customer_id": f.customer_id,
             "filename": f.filename,
@@ -73,7 +90,14 @@ def get_files():
             "file_type": f.file_type,
             "uploaded_at": f.uploaded_at.isoformat()
         })
-    return jsonify(response), 200
+        
+    return jsonify({
+        "page": results["page"],
+        "per_page": results["per_page"],
+        "total": results["total"],
+        "pages": results["pages"],
+        "items": response_items
+    }), 200
 
 
 @files_bp.route('/<string:file_id>', methods=['GET'])
