@@ -60,6 +60,8 @@ export const leadService = {
     email: string;
     phone: string;
     requirements?: string;
+    source?: string;
+    customer_id?: string | null;
   }): Promise<{ message: string; lead: Lead }> => {
     try {
       const response = await api.post('/leads', data);
@@ -73,6 +75,32 @@ export const leadService = {
       throw error;
     }
   },
+
+  editLead: async (
+    id: string,
+    data: {
+      name?: string;
+      email?: string;
+      phone?: string;
+      requirements?: string | null;
+      source?: string;
+      status?: string;
+      customer_id?: string | null;
+    }
+  ): Promise<{ message: string; lead: Lead }> => {
+    try {
+      const response = await api.put(`/leads/${id}`, data);
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        `PUT /leads/${id} failed`,
+        error.response?.status,
+        error.response?.data
+      );
+      throw error;
+    }
+  },
+
 
   updateLeadStatus: async (
     id: string,

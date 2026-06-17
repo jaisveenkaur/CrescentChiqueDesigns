@@ -62,6 +62,44 @@ export interface AuditLogsResponse {
   items: AuditLog[];
 }
 
+export interface LeadsAnalytics {
+  total_leads: number;
+  leads_by_status: Record<'new' | 'contacted' | 'qualified' | 'lost', number>;
+  leads_per_month: Array<{ month: string; count: number }>;
+  conversion_rate: number;
+  top_lead_sources: Array<{ source: string; count: number }>;
+}
+
+export interface UpcomingDeadline {
+  id: string;
+  customer_name: string;
+  project_status: string;
+  progress_percentage: number;
+  expected_completion: string;
+}
+
+export interface ProjectsAnalytics {
+  total_projects: number;
+  project_status_distribution: Record<string, number>;
+  average_project_completion: number;
+  upcoming_completion_deadlines: UpcomingDeadline[];
+  delayed_project_indicators: UpcomingDeadline[];
+  delayed_count: number;
+}
+
+export interface QuotationsAnalytics {
+  total_quotation_value: number;
+  monthly_quotation_trend: Array<{ month: string; count: number; total_value: number }>;
+  accepted_vs_rejected: Record<'accepted' | 'rejected' | 'pending', number>;
+  revenue_forecast: number;
+}
+
+export interface AdminAnalyticsPayload {
+  leads: LeadsAnalytics;
+  projects: ProjectsAnalytics;
+  quotations: QuotationsAnalytics;
+}
+
 export const dashboardService = {
   getAdminDashboard: async (): Promise<AdminDashboardMetrics> => {
     try {
@@ -71,6 +109,21 @@ export const dashboardService = {
     } catch (error: any) {
       console.error(
         "[DASHBOARD API FAILED] GET /dashboard/admin failed",
+        error.response?.status,
+        error.response?.data
+      );
+      throw error;
+    }
+  },
+
+  getAdminAnalytics: async (): Promise<AdminAnalyticsPayload> => {
+    try {
+      const response = await api.get('/dashboard/admin/analytics');
+      console.log('[ANALYTICS API SUCCESS] Loaded admin analytics');
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        "[ANALYTICS API FAILED] GET /dashboard/admin/analytics failed",
         error.response?.status,
         error.response?.data
       );
@@ -126,3 +179,4 @@ export const dashboardService = {
     }
   },
 };
+

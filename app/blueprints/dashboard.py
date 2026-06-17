@@ -36,6 +36,20 @@ def get_admin_dashboard():
         return jsonify({"error": f"Failed to retrieve admin dashboard metrics: {str(e)}"}), 500
 
 
+@dashboard_bp.route('/admin/analytics', methods=['GET'])
+@login_required
+@admin_required
+def get_admin_analytics():
+    """Retrieves multi-dimensional system-wide analytics for administrators."""
+    try:
+        from app.services.analytics_service import AnalyticsService
+        analytics = AnalyticsService.get_all_admin_analytics()
+        return jsonify(analytics), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve admin analytics: {str(e)}"}), 500
+
+
+
 @dashboard_bp.route('/customer', methods=['GET'])
 @login_required
 @customer_required

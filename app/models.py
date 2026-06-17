@@ -142,6 +142,7 @@ class Quotation(UUIDBase):
     tax_amount = Column(DECIMAL(12, 2), nullable=False)
     total_amount = Column(DECIMAL(12, 2), nullable=False)
     pdf_url = Column(String(512), nullable=True)
+    status = Column(String(50), nullable=False, default='pending')
     
     # Relationships
     customer = relationship('Customer', back_populates='quotations')
@@ -154,6 +155,14 @@ class Quotation(UUIDBase):
         if grade not in allowed_grades:
             raise ValueError(f"Invalid material grade: {grade}")
         return grade
+
+    @validates('status')
+    def validate_status(self, key, val):
+        allowed_statuses = {'pending', 'accepted', 'rejected'}
+        if val not in allowed_statuses:
+            raise ValueError(f"Invalid quotation status: {val}")
+        return val
+
 
 
 class Project(UUIDBase):
@@ -198,6 +207,7 @@ class Lead(UUIDBase):
     email = Column(String(191), nullable=False)
     phone = Column(String(20), nullable=False)
     requirements = Column(Text, nullable=True)
+    source = Column(String(50), nullable=False, default='Website')
     status = Column(String(50), nullable=False, default='new')
     
     # Relationships
@@ -209,6 +219,13 @@ class Lead(UUIDBase):
         if value not in allowed_statuses:
             raise ValueError(f"Invalid lead status: {value}")
         return value
+
+    @validates('source')
+    def validate_source(self, key, value):
+        if not value or not str(value).strip():
+            raise ValueError("Lead source cannot be empty")
+        return str(value).strip()
+
 
 
 class Notification(UUIDBase):

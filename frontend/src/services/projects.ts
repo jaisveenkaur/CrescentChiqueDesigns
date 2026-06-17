@@ -107,4 +107,78 @@ export const projectService = {
       throw error;
     }
   },
+
+  createProject: async (data: {
+    customer_id: string;
+    quotation_id: string;
+    project_status: string;
+    progress_percentage: number;
+    start_date?: string | null;
+    expected_completion?: string | null;
+  }): Promise<{ message: string; project: Project }> => {
+    try {
+      const response = await api.post('/projects', data);
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        "POST /projects failed",
+        error.response?.status,
+        error.response?.data
+      );
+      throw error;
+    }
+  },
+
+  editProject: async (
+    id: string,
+    data: {
+      customer_id?: string;
+      quotation_id?: string;
+      project_status?: string;
+      progress_percentage?: number;
+      start_date?: string | null;
+      expected_completion?: string | null;
+    }
+  ): Promise<{ message: string; project: Project }> => {
+    try {
+      const response = await api.put(`/projects/${id}`, data);
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        `PUT /projects/${id} failed`,
+        error.response?.status,
+        error.response?.data
+      );
+      throw error;
+    }
+  },
+
+  deleteProject: async (id: string): Promise<{ message: string }> => {
+    try {
+      const response = await api.delete(`/projects/${id}`);
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        `DELETE /projects/${id} failed`,
+        error.response?.status,
+        error.response?.data
+      );
+      throw error;
+    }
+  },
+
+  restoreProject: async (id: string): Promise<{ message: string }> => {
+    try {
+      const response = await api.put(`/projects/${id}/restore`);
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        `PUT /projects/${id}/restore failed`,
+        error.response?.status,
+        error.response?.data
+      );
+      throw error;
+    }
+  },
 };
+

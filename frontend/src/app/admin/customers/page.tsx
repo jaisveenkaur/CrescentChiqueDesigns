@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Users, Search, RefreshCw, Mail, Phone, MapPin } from 'lucide-react';
+import { Users, Search, RefreshCw, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
 import { api } from '@/services/api';
 
 interface CustomerProfile {
@@ -141,9 +142,14 @@ export default function AdminCustomers() {
                   </div>
                 </div>
 
-                <div className="border-t border-gold/10 pt-4 flex justify-between items-center text-[10px] text-charcoal/40 font-semibold uppercase tracking-wider">
-                  <span>Registered Date</span>
-                  <span>{cust.registered_at ? new Date(cust.registered_at).toLocaleDateString() : 'N/A'}</span>
+                <div className="border-t border-gold/10 pt-4 flex justify-between items-center text-[10px] font-semibold uppercase tracking-wider">
+                  <span className="text-charcoal/40">Registered: {cust.registered_at ? new Date(cust.registered_at).toLocaleDateString() : 'N/A'}</span>
+                  <Link 
+                    href={`/admin/customers/${cust.id}`}
+                    className="text-gold hover:text-gold/80 flex items-center gap-1.5 smooth-transition"
+                  >
+                    View Details <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
                 </div>
               </div>
             ))

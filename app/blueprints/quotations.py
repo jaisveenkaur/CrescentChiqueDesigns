@@ -50,9 +50,9 @@ def generate_quotation():
 @quotations_bp.route('', methods=['POST'])
 @login_required
 def save_quotation():
-    """Calculates design cost metrics and persists a new quotation for the logged-in customer."""
-    if current_user.role != 'customer' or not current_user.customer:
-        return jsonify({"error": "Only registered customers can save quotations"}), 403
+    """Calculates design cost metrics and persists a new quotation for a customer."""
+    if current_user.role != 'customer' and current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized role access"}), 403
         
     data = request.get_json() or {}
     
@@ -65,6 +65,16 @@ def save_quotation():
     area_sqft = data['area_sqft']
     material_grade = str(data['material_grade']).strip()
     
+    customer_id = None
+    if current_user.role == 'customer':
+        if not current_user.customer:
+            return jsonify({"error": "Only registered customers can save quotations"}), 403
+        customer_id = current_user.customer.id
+    elif current_user.role == 'admin':
+        if 'customer_id' not in data or not str(data['customer_id']).strip():
+            return jsonify({"error": "Missing required field: customer_id"}), 400
+        customer_id = str(data['customer_id']).strip()
+        
     try:
         # Generate calculation breakdown
         costs = QuotationService.calculate_costs(design_id, area_sqft, material_grade)
@@ -74,7 +84,7 @@ def save_quotation():
     try:
         # Save to DB
         quotation = Quotation(
-            customer_id=current_user.customer.id,
+            customer_id=customer_id,
             design_id=costs["design_id"],
             area_sqft=costs["area_sqft"],
             material_grade=costs["material_grade"],
@@ -82,7 +92,8 @@ def save_quotation():
             labour_cost=costs["labour_cost"],
             design_cost=costs["design_cost"],
             tax_amount=costs["tax_amount"],
-            total_amount=costs["total_amount"]
+            total_amount=costs["total_amount"],
+            status="accepted" if current_user.role == "customer" else data.get("status", "pending")
         )
         db.session.add(quotation)
         db.session.commit()
@@ -90,11 +101,13 @@ def save_quotation():
         # Audit logging
         AuditService.log(current_user.id, "Quotation Created", f"Quotation ID {quotation.id} created with amount {quotation.total_amount}")
         
-        # Email Notification
-        from app.services.email_service import EmailService
-        EmailService.send_quotation_generated(quotation, is_pdf=False)
-
-        
+        # Email Notification (send fail-safely)
+        try:
+            from app.services.email_service import EmailService
+            EmailService.send_quotation_generated(quotation, is_pdf=False)
+        except Exception:
+            pass
+            
         return jsonify({
             "id": quotation.id,
             "customer_id": quotation.customer_id,
@@ -106,12 +119,84 @@ def save_quotation():
             "design_cost": float(quotation.design_cost),
             "tax_amount": float(quotation.tax_amount),
             "total_amount": float(quotation.total_amount),
+            "status": quotation.status,
             "created_at": quotation.created_at.isoformat()
         }), 201
         
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Database transaction failed: {str(e)}"}), 500
+
+
+@quotations_bp.route('/<string:quotation_id>', methods=['PUT'])
+@login_required
+@admin_required
+def update_quotation(quotation_id):
+    """Allows administrators to edit an existing quotation, re-calculating costs (Admin only)."""
+    quotation = Quotation.query.filter_by(id=quotation_id, is_deleted=False).first()
+    if not quotation:
+        return jsonify({"error": "Quotation not found"}), 404
+        
+    data = request.get_json() or {}
+    
+    try:
+        # Determine if we need to re-calculate costs
+        recalc_fields = ['design_id', 'area_sqft', 'material_grade']
+        needs_recalc = any(f in data for f in recalc_fields)
+        
+        if needs_recalc:
+            design_id = str(data.get('design_id', quotation.design_id)).strip()
+            area_sqft = data.get('area_sqft', quotation.area_sqft)
+            material_grade = str(data.get('material_grade', quotation.material_grade)).strip()
+            
+            costs = QuotationService.calculate_costs(design_id, area_sqft, material_grade)
+            quotation.design_id = costs["design_id"]
+            quotation.area_sqft = costs["area_sqft"]
+            quotation.material_grade = costs["material_grade"]
+            quotation.material_cost = costs["material_cost"]
+            quotation.labour_cost = costs["labour_cost"]
+            quotation.design_cost = costs["design_cost"]
+            quotation.tax_amount = costs["tax_amount"]
+            quotation.total_amount = costs["total_amount"]
+        
+        if 'customer_id' in data:
+            quotation.customer_id = str(data['customer_id']).strip()
+            
+        if 'status' in data:
+            # Validate status
+            status = str(data['status']).strip()
+            if status not in {'pending', 'accepted', 'rejected'}:
+                return jsonify({"error": "Invalid quotation status"}), 400
+            quotation.status = status
+
+        db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Quotation Updated", f"Quotation ID {quotation.id} fields updated by admin {current_user.email}")
+        
+        return jsonify({
+            "message": "Quotation updated successfully",
+            "quotation": {
+                "id": quotation.id,
+                "customer_id": quotation.customer_id,
+                "design_id": quotation.design_id,
+                "area_sqft": float(quotation.area_sqft),
+                "material_grade": quotation.material_grade,
+                "material_cost": float(quotation.material_cost),
+                "labour_cost": float(quotation.labour_cost),
+                "design_cost": float(quotation.design_cost),
+                "tax_amount": float(quotation.tax_amount),
+                "total_amount": float(quotation.total_amount),
+                "status": quotation.status
+            }
+        }), 200
+        
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update quotation: {str(e)}"}), 500
+
 
 
 @quotations_bp.route('', methods=['GET'])

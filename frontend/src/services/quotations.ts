@@ -45,6 +45,8 @@ export const quotationService = {
     design_id: string;
     area_sqft: number;
     material_grade: 'Economy' | 'Premium' | 'Luxury';
+    customer_id?: string;
+    status?: 'pending' | 'accepted' | 'rejected';
   }): Promise<Quotation> => {
     try {
       const response = await api.post('/quotations', data);
@@ -58,6 +60,30 @@ export const quotationService = {
       throw error;
     }
   },
+
+  editQuotation: async (
+    id: string,
+    data: {
+      design_id?: string;
+      area_sqft?: number;
+      material_grade?: 'Economy' | 'Premium' | 'Luxury';
+      customer_id?: string;
+      status?: 'pending' | 'accepted' | 'rejected';
+    }
+  ): Promise<{ message: string; quotation: Quotation }> => {
+    try {
+      const response = await api.put(`/quotations/${id}`, data);
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        `PUT /quotations/${id} failed`,
+        error.response?.status,
+        error.response?.data
+      );
+      throw error;
+    }
+  },
+
 
   getQuotations: async (params?: {
     page?: number;

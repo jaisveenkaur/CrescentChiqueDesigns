@@ -22,9 +22,9 @@ def admin_required(f):
 @leads_bp.route('', methods=['POST'])
 @login_required
 def create_lead():
-    """Allows a registered customer to create a new service inquiry lead."""
-    if current_user.role != 'customer' or not current_user.customer:
-        return jsonify({"error": "Only registered customers can create leads"}), 403
+    """Allows a customer or administrator to create a new service inquiry lead."""
+    if current_user.role != 'customer' and current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized role access"}), 403
         
     data = request.get_json() or {}
     
@@ -37,7 +37,16 @@ def create_lead():
     email = data['email']
     phone = data['phone']
     requirements = data.get('requirements')
+    source = data.get('source', 'Website')
     
+    customer_id = None
+    if current_user.role == 'customer':
+        if not current_user.customer:
+            return jsonify({"error": "Customer profile details not found"}), 403
+        customer_id = current_user.customer.id
+    elif current_user.role == 'admin':
+        customer_id = data.get('customer_id') # optional customer linkage
+        
     try:
         clean_name, clean_email, clean_phone, clean_reqs = LeadService.validate_lead_creation(
             name, email, phone, requirements
@@ -47,18 +56,19 @@ def create_lead():
         
     try:
         lead = Lead(
-            customer_id=current_user.customer.id,
+            customer_id=customer_id,
             name=clean_name,
             email=clean_email,
             phone=clean_phone,
             requirements=clean_reqs,
+            source=source,
             status='new'
         )
         db.session.add(lead)
         db.session.commit()
         
         # Audit logging
-        AuditService.log(current_user.id, "Lead Created", f"Lead ID {lead.id} created for customer {lead.customer_id}")
+        AuditService.log(current_user.id, "Lead Created", f"Lead ID {lead.id} created for customer {lead.customer_id or 'Guest'}")
         
         return jsonify({
             "message": "Lead created successfully",
@@ -69,6 +79,7 @@ def create_lead():
                 "email": lead.email,
                 "phone": lead.phone,
                 "requirements": lead.requirements,
+                "source": lead.source,
                 "status": lead.status,
                 "created_at": lead.created_at.isoformat()
             }
@@ -77,6 +88,67 @@ def create_lead():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to create lead: {str(e)}"}), 500
+
+
+@leads_bp.route('/<string:lead_id>', methods=['PUT'])
+@login_required
+@admin_required
+def update_lead(lead_id):
+    """Modifies all fields of a specific lead (Admin only)."""
+    lead = Lead.query.filter_by(id=lead_id, is_deleted=False).first()
+    if not lead:
+        return jsonify({"error": "Lead not found"}), 404
+        
+    data = request.get_json() or {}
+    
+    # Validation checks
+    try:
+        if 'email' in data and '@' not in str(data['email']):
+            return jsonify({"error": "Invalid email format"}), 400
+        if 'status' in data:
+            LeadService.validate_lead_status(data['status'])
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    try:
+        if 'name' in data:
+            lead.name = str(data['name']).strip()
+        if 'email' in data:
+            lead.email = str(data['email']).strip().lower()
+        if 'phone' in data:
+            lead.phone = str(data['phone']).strip()
+        if 'requirements' in data:
+            lead.requirements = str(data['requirements']).strip() if data['requirements'] else None
+        if 'source' in data:
+            lead.source = str(data['source']).strip()
+        if 'status' in data:
+            lead.status = str(data['status']).strip()
+        if 'customer_id' in data:
+            lead.customer_id = data['customer_id'] if data['customer_id'] else None
+
+        db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Lead Updated", f"Lead ID {lead.id} updated by admin {current_user.email}")
+        
+        return jsonify({
+            "message": "Lead updated successfully",
+            "lead": {
+                "id": lead.id,
+                "customer_id": lead.customer_id,
+                "name": lead.name,
+                "email": lead.email,
+                "phone": lead.phone,
+                "requirements": lead.requirements,
+                "source": lead.source,
+                "status": lead.status
+            }
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update lead: {str(e)}"}), 500
+
 
 
 @leads_bp.route('', methods=['GET'])

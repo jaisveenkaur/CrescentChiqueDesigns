@@ -197,10 +197,144 @@ def update_project_progress(project_id):
         return jsonify({"error": f"Failed to update project progress: {str(e)}"}), 500
 
 
+@projects_bp.route('', methods=['POST'])
+@login_required
+@admin_required
+def create_project():
+    """Allows administrators to create a new project workspace (Admin only)."""
+    data = request.get_json() or {}
+    
+    required = ['customer_id', 'quotation_id']
+    missing = [f for f in required if f not in data or not str(data[f]).strip()]
+    if missing:
+        return jsonify({"error": f"Missing required fields: {', '.join(missing)}"}), 400
+        
+    customer_id = data['customer_id']
+    quotation_id = data['quotation_id']
+    status = data.get('project_status', 'Execution')
+    progress = data.get('progress_percentage', 0)
+    
+    # Date parsing
+    from datetime import datetime
+    start_date = None
+    expected_completion = None
+    
+    if data.get('start_date'):
+        try:
+            start_date = datetime.strptime(str(data['start_date']).split('T')[0], "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({"error": "Invalid start_date format, must be YYYY-MM-DD"}), 400
+            
+    if data.get('expected_completion'):
+        try:
+            expected_completion = datetime.strptime(str(data['expected_completion']).split('T')[0], "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({"error": "Invalid expected_completion format, must be YYYY-MM-DD"}), 400
+
+    try:
+        val_status, val_progress = ProjectService.validate_project_update(status, progress)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    try:
+        project = Project(
+            customer_id=customer_id,
+            quotation_id=quotation_id,
+            project_status=val_status,
+            progress_percentage=val_progress,
+            start_date=start_date,
+            expected_completion=expected_completion
+        )
+        db.session.add(project)
+        db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Project Created", f"Project ID {project.id} created for customer {customer_id}")
+        
+        return jsonify({
+            "message": "Project created successfully",
+            "project": {
+                "id": project.id,
+                "customer_id": project.customer_id,
+                "quotation_id": project.quotation_id,
+                "project_status": project.project_status,
+                "progress_percentage": int(project.progress_percentage)
+            }
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to create project: {str(e)}"}), 500
+
+
+@projects_bp.route('/<string:project_id>', methods=['PUT'])
+@login_required
+@admin_required
+def update_project(project_id):
+    """Allows administrators to edit all fields of an existing project (Admin only)."""
+    project = Project.query.filter_by(id=project_id, is_deleted=False).first()
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+        
+    data = request.get_json() or {}
+    
+    # Date parsing
+    from datetime import datetime
+    
+    try:
+        if 'project_status' in data or 'progress_percentage' in data:
+            status = data.get('project_status', project.project_status)
+            progress = data.get('progress_percentage', project.progress_percentage)
+            val_status, val_progress = ProjectService.validate_project_update(status, progress)
+            project.project_status = val_status
+            project.progress_percentage = val_progress
+
+        if 'start_date' in data:
+            if data['start_date']:
+                project.start_date = datetime.strptime(str(data['start_date']).split('T')[0], "%Y-%m-%d").date()
+            else:
+                project.start_date = None
+
+        if 'expected_completion' in data:
+            if data['expected_completion']:
+                project.expected_completion = datetime.strptime(str(data['expected_completion']).split('T')[0], "%Y-%m-%d").date()
+            else:
+                project.expected_completion = None
+                
+        if 'customer_id' in data:
+            project.customer_id = data['customer_id']
+            
+        if 'quotation_id' in data:
+            project.quotation_id = data['quotation_id']
+
+        db.session.commit()
+        
+        # Audit logging
+        AuditService.log(current_user.id, "Project Updated", f"Project ID {project.id} fields updated by admin {current_user.email}")
+        
+        return jsonify({
+            "message": "Project updated successfully",
+            "project": {
+                "id": project.id,
+                "customer_id": project.customer_id,
+                "quotation_id": project.quotation_id,
+                "project_status": project.project_status,
+                "progress_percentage": int(project.progress_percentage)
+            }
+        }), 200
+        
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update project: {str(e)}"}), 500
+
+
 @projects_bp.route('/<string:project_id>', methods=['DELETE'])
 @login_required
 @admin_required
 def delete_project(project_id):
+
     """Soft deletes a project record logically from system operations (Admin only)."""
     try:
         SoftDeleteService.soft_delete_record(Project, project_id)
