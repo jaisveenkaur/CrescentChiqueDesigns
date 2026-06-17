@@ -53,7 +53,7 @@ export default function AdminProjects() {
       queryClient.invalidateQueries({ queryKey: ['adminDashboard'] });
     },
     onError: (err: any) => {
-      setProgressError(err || 'Failed to update progress percentage.');
+      setProgressError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to update progress percentage.');
     },
   });
 
@@ -67,7 +67,7 @@ export default function AdminProjects() {
       queryClient.invalidateQueries({ queryKey: ['projectNotes', selectedProj?.id] });
     },
     onError: (err: any) => {
-      setNoteError(err || 'Failed to save project note.');
+      setNoteError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to save project note.');
     },
   });
 

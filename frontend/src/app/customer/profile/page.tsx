@@ -43,7 +43,7 @@ export default function CustomerProfile() {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
     },
     onError: (err: any) => {
-      setFormError(err || 'Failed to modify profile details.');
+      setFormError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to modify profile details.');
     },
   });
 

@@ -36,7 +36,7 @@ export default function CustomerLeads() {
       queryClient.invalidateQueries({ queryKey: ['customerLeads'] });
     },
     onError: (err: any) => {
-      setFormError(err || 'Failed to submit design inquiry.');
+      setFormError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to submit design inquiry.');
     },
   });
 

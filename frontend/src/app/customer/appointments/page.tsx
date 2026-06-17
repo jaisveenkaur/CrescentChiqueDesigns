@@ -34,7 +34,7 @@ export default function CustomerAppointments() {
       queryClient.invalidateQueries({ queryKey: ['customerAppointments'] });
     },
     onError: (err: any) => {
-      setFormError(err || 'Failed to book consultation slots.');
+      setFormError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to book consultation slots.');
     },
   });
 

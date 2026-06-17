@@ -31,7 +31,7 @@ export default function CustomerFiles() {
       queryClient.invalidateQueries({ queryKey: ['customerFiles'] });
     },
     onError: (err: any) => {
-      setUploadError(err || 'Failed to upload file. Check file size (max 5MB) and formats.');
+      setUploadError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to upload file. Check file size (max 5MB) and formats.');
       setUploadingName('');
     },
   });

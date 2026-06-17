@@ -38,7 +38,7 @@ export default function AdminQuotations() {
       setEstimationError('');
     },
     onError: (err: any) => {
-      setEstimationError(err || 'Failed to calculate estimation');
+      setEstimationError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to calculate estimation');
     },
   });
 

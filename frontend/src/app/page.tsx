@@ -110,7 +110,7 @@ export default function Home() {
       setBookingError('');
     },
     onError: (err: any) => {
-      setBookingError(err || 'Failed to schedule appointment. Please ensure you are logged in as a customer.');
+      setBookingError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to schedule appointment. Please ensure you are logged in as a customer.');
     },
   });
 

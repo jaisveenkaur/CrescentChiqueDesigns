@@ -67,7 +67,7 @@ function LoginContent() {
       }
     },
     onError: (err: any) => {
-      setErrorMsg(err || 'Authentication failed. Please verify credentials.');
+      setErrorMsg(err.response?.data?.error || err.response?.data?.message || err.message || 'Authentication failed. Please verify credentials.');
     },
   });
 
@@ -80,7 +80,7 @@ function LoginContent() {
       setErrorMsg('');
     },
     onError: (err: any) => {
-      setErrorMsg(err || 'Registration failed. Please check inputs.');
+      setErrorMsg(err.response?.data?.error || err.response?.data?.message || err.message || 'Registration failed. Please check inputs.');
     },
   });
 
