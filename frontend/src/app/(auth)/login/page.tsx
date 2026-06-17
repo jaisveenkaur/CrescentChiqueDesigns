@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { Compass, Lock, Mail, User, Phone, MapPin, Sparkles, ArrowLeft } from 'lucide-react';
 import { authService } from '@/services/auth';
+import { api } from '@/services/api';
 
 function LoginContent() {
   const router = useRouter();
@@ -27,6 +28,25 @@ function LoginContent() {
   
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
+
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'unreachable'>('checking');
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001/api/v1';
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const response = await api.get('/auth/ping');
+        if (response.status === 200) {
+          setBackendStatus('connected');
+        } else {
+          setBackendStatus('unreachable');
+        }
+      } catch (err) {
+        setBackendStatus('unreachable');
+      }
+    };
+    checkConnection();
+  }, []);
 
   useEffect(() => {
     if (sessionExpired) {
@@ -344,6 +364,32 @@ function LoginContent() {
               </div>
             </div>
           )}
+
+          {/* Backend Connection Status */}
+          <div className="mt-6 border-t border-gold/10 pt-4 flex flex-col items-center gap-1.5 text-[9px]">
+            <span className="text-charcoal/50 uppercase font-bold tracking-wider">
+              Studio Backend
+            </span>
+            <div className="flex items-center gap-1.5 font-bold tracking-wide">
+              <span className={`h-2 w-2 rounded-full ${
+                backendStatus === 'connected' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' :
+                backendStatus === 'unreachable' ? 'bg-rose-500 shadow-[0_0_8px_#f43f5e]' :
+                'bg-amber-500 animate-pulse'
+              }`} />
+              <span className={
+                backendStatus === 'connected' ? 'text-emerald-600' :
+                backendStatus === 'unreachable' ? 'text-rose-600' :
+                'text-amber-600'
+              }>
+                {backendStatus === 'connected' ? 'BACKEND CONNECTED' :
+                 backendStatus === 'unreachable' ? 'BACKEND UNREACHABLE' :
+                 'CHECKING STATUS...'}
+              </span>
+            </div>
+            <span className="font-mono text-charcoal/40 text-[8px] truncate max-w-[280px]">
+              URL: {apiUrl}
+            </span>
+          </div>
         </div>
       </div>
     </div>
