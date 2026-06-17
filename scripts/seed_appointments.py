@@ -1,3 +1,4 @@
+import setup_paths
 import uuid
 from datetime import date, time
 from app.models import db, Appointment

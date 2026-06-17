@@ -1,3 +1,4 @@
+import setup_paths
 import uuid
 from app.models import db, Lead
 

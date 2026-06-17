@@ -1,3 +1,4 @@
+import setup_paths
 import uuid
 from datetime import date
 from decimal import Decimal

@@ -1,3 +1,4 @@
+import setup_paths
 import uuid
 from decimal import Decimal
 from app.models import db, Design, DesignImage

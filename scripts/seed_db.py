@@ -1,11 +1,4 @@
-import os
-import sys
-
-# Inject parent path to resolve application factory context lookup
-sys.path.insert(
-    0,
-    os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-)
+import setup_paths
 from app import create_app
 from app.models import db, User, Customer, Design, DesignImage, Appointment, Quotation, Project, Lead, Notification, File, AuditLog
 
