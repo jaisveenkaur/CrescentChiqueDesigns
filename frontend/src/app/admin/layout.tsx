@@ -10,10 +10,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, loading } = useAuth();
 
   useEffect(() => {
+    console.log(`[ADMIN GUARD] user: ${user?.email}, role: ${user?.role}, loading: ${loading}`);
     if (!loading) {
       if (!user) {
+        console.warn(`[ADMIN GUARD] Redirecting to login: session expired or user context missing.`);
         router.push('/login?expired=true');
       } else if (user.role !== 'admin') {
+        console.warn(`[ADMIN GUARD] Redirecting to login: user role ${user.role} is not admin.`);
         router.push('/login');
       }
     }

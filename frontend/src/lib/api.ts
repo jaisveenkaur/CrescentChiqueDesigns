@@ -10,15 +10,10 @@ export const api = axios.create({
   },
 });
 
-// Interceptor to attach auth headers if token is present
+// Interceptor for request diagnostics
 api.interceptors.request.use(
   (config) => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
+    console.log(`[SESSION CHECK] Initiating request to URL: ${config.url}`);
     return config;
   },
   (error) => Promise.reject(error)
@@ -33,8 +28,9 @@ api.interceptors.response.use(
       
       // 401 Unauthorized indicates credentials missing or expired
       if (status === 401) {
+        console.warn(`[SESSION FAILED] Request rejected with 401 Unauthorized for URL: ${error.config?.url}`);
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem('is_logged_in');
           localStorage.removeItem('user_role');
           localStorage.removeItem('user_name');
           localStorage.removeItem('user_email');

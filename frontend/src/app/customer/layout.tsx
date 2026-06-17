@@ -10,10 +10,13 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   const { user, loading } = useAuth();
 
   useEffect(() => {
+    console.log(`[CUSTOMER GUARD] user: ${user?.email}, role: ${user?.role}, loading: ${loading}`);
     if (!loading) {
       if (!user) {
+        console.warn(`[CUSTOMER GUARD] Redirecting to login: session expired or user context missing.`);
         router.push('/login?expired=true');
       } else if (user.role !== 'customer') {
+        console.warn(`[CUSTOMER GUARD] Redirecting to login: user role ${user.role} is not customer.`);
         router.push('/login');
       }
     }

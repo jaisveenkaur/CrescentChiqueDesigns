@@ -66,10 +66,11 @@ export const dashboardService = {
   getAdminDashboard: async (): Promise<AdminDashboardMetrics> => {
     try {
       const response = await api.get('/dashboard/admin');
+      console.log('[DASHBOARD API SUCCESS] Loaded admin stats');
       return response.data;
     } catch (error: any) {
       console.error(
-        "GET /dashboard/admin failed",
+        "[DASHBOARD API FAILED] GET /dashboard/admin failed",
         error.response?.status,
         error.response?.data
       );
@@ -80,10 +81,11 @@ export const dashboardService = {
   getCustomerDashboard: async (): Promise<CustomerDashboardMetrics> => {
     try {
       const response = await api.get('/dashboard/customer');
+      console.log('[DASHBOARD API SUCCESS] Loaded customer stats');
       return response.data;
     } catch (error: any) {
       console.error(
-        "GET /dashboard/customer failed",
+        "[DASHBOARD API FAILED] GET /dashboard/customer failed",
         error.response?.status,
         error.response?.data
       );

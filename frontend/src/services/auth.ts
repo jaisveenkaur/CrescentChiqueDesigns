@@ -22,7 +22,7 @@ export const authService = {
       const response = await api.post('/auth/login', { email, password, remember });
       const { user } = response.data;
       if (typeof window !== 'undefined') {
-        localStorage.setItem('auth_token', 'session_active');
+        localStorage.setItem('is_logged_in', 'true');
         localStorage.setItem('user_role', user.role);
         localStorage.setItem('user_name', user.name);
         localStorage.setItem('user_email', user.email);
@@ -73,7 +73,7 @@ export const authService = {
       throw error;
     } finally {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('is_logged_in');
         localStorage.removeItem('user_role');
         localStorage.removeItem('user_name');
         localStorage.removeItem('user_email');

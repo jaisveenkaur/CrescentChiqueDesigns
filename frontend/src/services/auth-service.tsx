@@ -20,10 +20,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = async (): Promise<User | null> => {
     try {
+      console.log(`[AUTH CHECK] Checking active session via /auth/me...`);
       const response = await api.get('/auth/me');
       setUser(response.data);
+      console.log(`[PROFILE LOADED] Successful user context: ${response.data.email}`);
+      console.log(`[ROLE FOUND] User profile loaded with role: ${response.data.role}`);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('auth_token', 'session_active');
+        localStorage.setItem('is_logged_in', 'true');
         localStorage.setItem('user_role', response.data.role);
         localStorage.setItem('user_name', response.data.name);
         localStorage.setItem('user_email', response.data.email);
@@ -31,9 +34,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return response.data;
     } catch (error: any) {
+      console.error(`[SESSION FAILED] Profile refresh failed:`, error.response?.status, error.response?.data);
       setUser(null);
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('is_logged_in');
         localStorage.removeItem('user_role');
         localStorage.removeItem('user_name');
         localStorage.removeItem('user_email');
@@ -46,11 +50,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Check if token exists before making request to avoid redundant me-calls
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (token) {
+    console.log(`[AUTH CHECK] Checking local active session flag`);
+    const isLoggedIn = typeof window !== 'undefined' ? localStorage.getItem('is_logged_in') : null;
+    if (isLoggedIn) {
+      console.log(`[TOKEN FOUND / SESSION FOUND] Local login flag detected, fetching profile...`);
       refreshProfile();
     } else {
+      console.log(`[AUTH CHECK] No active local session flag found`);
       setLoading(false);
     }
   }, []);
