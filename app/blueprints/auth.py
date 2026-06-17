@@ -174,3 +174,26 @@ def profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to update profile: {str(e)}"}), 500
+
+
+@auth_bp.route('/me', methods=['GET'])
+@login_required
+def me():
+    """Returns the current authenticated user context details."""
+    profile_data = {
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role
+    }
+    
+    # Pull extra details for customer roles
+    if current_user.role == 'customer' and current_user.customer:
+        profile_data.update({
+            "phone": current_user.customer.phone,
+            "address": current_user.customer.address,
+            "city": current_user.customer.city,
+            "state": current_user.customer.state
+        })
+        
+    return jsonify(profile_data), 200

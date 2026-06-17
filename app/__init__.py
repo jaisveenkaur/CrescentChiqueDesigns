@@ -17,6 +17,10 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
+    
+    # Configure Flask-CORS for secure cross-origin sessions
+    from flask_cors import CORS
+    CORS(app, supports_credentials=True, origins=['http://localhost:3000', 'http://127.0.0.1:3000'])
 
     
     # Configure Flask-Login settings
@@ -48,6 +52,7 @@ def create_app(config_name=None):
     from app.blueprints.dashboard import dashboard_bp
     from app.blueprints.audit_logs import audit_logs_bp
     from app.blueprints.timeline import timeline_bp
+    from app.blueprints.customers import customers_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(designs_bp, url_prefix='/api/v1/designs')
@@ -61,6 +66,7 @@ def create_app(config_name=None):
     app.register_blueprint(dashboard_bp, url_prefix='/api/v1/dashboard')
     app.register_blueprint(audit_logs_bp, url_prefix='/api/v1/audit-logs')
     app.register_blueprint(timeline_bp, url_prefix='/api/v1/timeline')
+    app.register_blueprint(customers_bp, url_prefix='/api/v1/customers')
 
 
     @app.route("/")

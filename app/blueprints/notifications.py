@@ -88,3 +88,63 @@ def mark_notification_read(notification_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to mark notification as read: {str(e)}"}), 500
+
+
+def admin_required(f):
+    """Decorator to restrict view access to Administrator roles only."""
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            return jsonify({"error": "Admin privilege required"}), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@notifications_bp.route('', methods=['POST'])
+@login_required
+@admin_required
+def create_notification():
+    """Allows administrators to broadcast custom alert notifications to specific customers."""
+    data = request.get_json() or {}
+    customer_id = data.get('customer_id')
+    title = data.get('title')
+    message = data.get('message')
+    
+    if not customer_id or not title or not message:
+        return jsonify({"error": "Missing required fields: customer_id, title, message"}), 400
+        
+    try:
+        from app.models import Customer
+        cust = Customer.query.filter_by(id=customer_id, is_deleted=False).first()
+        if not cust:
+            return jsonify({"error": "Target customer profile not found"}), 404
+            
+        n = Notification(
+            customer_id=customer_id,
+            title=title.strip(),
+            message=message.strip(),
+            is_read=False
+        )
+        db.session.add(n)
+        db.session.commit()
+        
+        # Audit logging
+        AuditService.log(
+            current_user.id,
+            "Notification Broadcasted",
+            f"Notification ID {n.id} sent to customer {customer_id}"
+        )
+        
+        return jsonify({
+            "message": "Notification dispatched successfully",
+            "notification": {
+                "id": n.id,
+                "customer_id": n.customer_id,
+                "title": n.title,
+                "message": n.message
+            }
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to dispatch notification: {str(e)}"}), 500
