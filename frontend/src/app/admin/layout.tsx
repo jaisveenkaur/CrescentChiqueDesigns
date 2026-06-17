@@ -1,27 +1,25 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/services/auth-service';
 import AdminNav from '@/components/admin-nav';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    const role = localStorage.getItem('user_role');
-    
-    if (!token) {
-      router.push('/login?expired=true');
-    } else if (role !== 'admin') {
-      router.push('/login'); // Prevent customers from accessing admin space directly
-    } else {
-      setAuthorized(true);
+    if (!loading) {
+      if (!user) {
+        router.push('/login?expired=true');
+      } else if (user.role !== 'admin') {
+        router.push('/login');
+      }
     }
-  }, [router]);
+  }, [user, loading, router]);
 
-  if (!authorized) {
+  if (loading || !user || user.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-beige-soft">
         <div className="flex flex-col items-center gap-3">

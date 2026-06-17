@@ -1,27 +1,25 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/services/auth-service';
 import CustomerNav from '@/components/customer-nav';
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    const role = localStorage.getItem('user_role');
-    
-    if (!token) {
-      router.push('/login?expired=true');
-    } else if (role !== 'customer') {
-      router.push('/login'); // Prevent admins from accessing customer space directly
-    } else {
-      setAuthorized(true);
+    if (!loading) {
+      if (!user) {
+        router.push('/login?expired=true');
+      } else if (user.role !== 'customer') {
+        router.push('/login');
+      }
     }
-  }, [router]);
+  }, [user, loading, router]);
 
-  if (!authorized) {
+  if (loading || !user || user.role !== 'customer') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-beige-soft">
         <div className="flex flex-col items-center gap-3">

@@ -25,7 +25,7 @@ export default function AdminDashboard() {
   }, []);
 
   // Fetch admin metrics
-  const { data: metrics, isLoading, isError } = useQuery<AdminDashboardMetrics>({
+  const { data: metrics, isLoading, isError, refetch } = useQuery<AdminDashboardMetrics>({
     queryKey: ['adminDashboard'],
     queryFn: dashboardService.getAdminDashboard,
   });
@@ -41,8 +41,20 @@ export default function AdminDashboard() {
 
   if (isError || !metrics) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-xl text-center max-w-md mx-auto">
-        Failed to load administrator dashboard metrics. Verify database connections.
+      <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 text-center">
+        <div className="bg-white/60 glass-card rounded-3xl p-8 max-w-md w-full border border-red-500/20 shadow-xl flex flex-col items-center gap-4">
+          <span className="text-red-500 text-[10px] font-bold uppercase tracking-widest">Connection Failure</span>
+          <h3 className="font-serif text-lg font-semibold text-charcoal">Analytics Offline</h3>
+          <p className="text-xs text-charcoal/70 leading-relaxed">
+            Failed to load administrator dashboard metrics. Verify your local server configuration and try again.
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="mt-2 px-6 py-2.5 bg-gold-gradient text-white rounded-full text-xs font-bold uppercase tracking-widest hover:shadow-lg transition-transform hover:-translate-y-0.5 smooth-transition cursor-pointer"
+          >
+            Retry Connection
+          </button>
+        </div>
       </div>
     );
   }

@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Compass, Users, Search, RefreshCw, Mail, Phone, MapPin, Award } from 'lucide-react';
+import { Users, Search, RefreshCw, Mail, Phone, MapPin } from 'lucide-react';
+import { api } from '@/services/api';
 
 interface CustomerProfile {
   id: string;
@@ -16,52 +17,24 @@ interface CustomerProfile {
   tier: 'Economy' | 'Premium' | 'Luxury';
 }
 
-const mockCustomersList: CustomerProfile[] = [
-  {
-    id: 'customer-id-456',
-    name: 'Jaisveen Kaur',
-    email: 'jaisveen@gmail.com',
-    phone: '+1 (555) 019-2834',
-    address: '100 Luxury Avenue, Suite 400',
-    city: 'Beverly Hills',
-    state: 'CA',
-    registered_at: '2026-05-15T10:00:00Z',
-    tier: 'Premium',
-  },
-  {
-    id: 'customer-id-789',
-    name: 'Robert Downey',
-    email: 'robert@stark.com',
-    phone: '+1 (555) 014-9999',
-    address: '10880 Malibu Point',
-    city: 'Malibu',
-    state: 'CA',
-    registered_at: '2026-06-01T14:00:00Z',
-    tier: 'Luxury',
-  },
-  {
-    id: 'customer-id-101',
-    name: 'Clara Oswald',
-    email: 'clara@tardis.com',
-    phone: '+1 (555) 015-8888',
-    address: '77 Maple Street',
-    city: 'London',
-    state: 'UK',
-    registered_at: '2026-06-10T09:30:00Z',
-    tier: 'Economy',
-  }
-];
-
 export default function AdminCustomers() {
   const [search, setSearch] = useState('');
 
-  // Fetch customers (mock fallback setup)
-  const { data: customers = [], isLoading, refetch } = useQuery<CustomerProfile[]>({
+  // Fetch customers from live endpoint
+  const { data: customers = [], isLoading, isError, refetch, error } = useQuery<CustomerProfile[]>({
     queryKey: ['adminCustomers'],
     queryFn: async () => {
-      // Simulate slight network delay
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockCustomersList;
+      try {
+        const response = await api.get('/customers');
+        return response.data;
+      } catch (err: any) {
+        console.error(
+          "GET /customers failed",
+          err.response?.status,
+          err.response?.data
+        );
+        throw err;
+      }
     },
   });
 
@@ -98,10 +71,11 @@ export default function AdminCustomers() {
           </div>
           <button
             onClick={() => refetch()}
-            className="p-2 border border-gold/10 hover:border-gold/50 rounded-xl hover:bg-gold/5 text-gold smooth-transition"
+            disabled={isLoading}
+            className="p-2 border border-gold/10 hover:border-gold/50 rounded-xl hover:bg-gold/5 text-gold smooth-transition disabled:opacity-50"
             title="Refresh List"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -110,6 +84,19 @@ export default function AdminCustomers() {
         <div className="py-24 text-center flex flex-col items-center justify-center gap-4">
           <div className="h-8 w-8 rounded-full border-2 border-gold border-t-transparent animate-spin" />
           <p className="text-xs text-gold font-semibold tracking-widest uppercase">Opening Client Directory...</p>
+        </div>
+      ) : isError ? (
+        <div className="bg-red-50/10 border border-red-500/20 glass-card rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-4">
+          <p className="text-sm text-red-500 font-semibold uppercase tracking-wider">Failed to Open Client Directory</p>
+          <p className="text-xs text-charcoal/70 max-w-md">
+            {(error as any)?.response?.data?.error || (error as any)?.message || 'A network error occurred while connecting to the database.'}
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="mt-2 px-5 py-2 border border-gold hover:bg-gold/15 text-gold text-xs font-bold uppercase tracking-wider rounded-full smooth-transition cursor-pointer"
+          >
+            Retry Connection
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -135,7 +122,7 @@ export default function AdminCustomers() {
                   </div>
 
                   <span className="bg-gold/10 text-gold border border-gold/30 text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                    {cust.tier} Member
+                    {cust.tier || 'Economy'} Member
                   </span>
                 </div>
 
@@ -150,13 +137,13 @@ export default function AdminCustomers() {
                   </div>
                   <div className="flex items-start gap-2">
                     <MapPin className="h-4 w-4 text-gold shrink-0 mt-0.5" />
-                    <span>{cust.address}, {cust.city}, {cust.state}</span>
+                    <span>{cust.address || 'N/A'}, {cust.city}, {cust.state}</span>
                   </div>
                 </div>
 
                 <div className="border-t border-gold/10 pt-4 flex justify-between items-center text-[10px] text-charcoal/40 font-semibold uppercase tracking-wider">
                   <span>Registered Date</span>
-                  <span>{new Date(cust.registered_at).toLocaleDateString()}</span>
+                  <span>{cust.registered_at ? new Date(cust.registered_at).toLocaleDateString() : 'N/A'}</span>
                 </div>
               </div>
             ))

@@ -1,71 +1,63 @@
 # Crescent Chique Designs — API Integration Report
 
-This report documents the state of the backend REST API endpoints and maps them to their respective frontend page integrations. All missing backend routes have been fully implemented and verified on the Flask server.
+This report summarizes the status of the frontend API integration audit, mapping the live endpoints, verifying connection status, and detailing the complete removal of offline mock fallbacks.
 
 ---
 
-## 1. Newly Implemented & Refactored Backend Routes
+## 1. Connected Endpoints
 
-To align with the architecture audit and support frontend portal functions, the following backend enhancements have been completed:
+All frontend services have been refactored to use the central Axios instance pointing to `NEXT_PUBLIC_API_URL` (port `5001` in local development). The following endpoints are actively connected to Next.js pages:
 
-1. **Flask-CORS Session Integration**:
-   - Replaced manual origin headers with standard `flask-cors`.
-   - Enabled `supports_credentials=True` for origin headers `http://localhost:3000` and `http://127.0.0.1:3000` to support cookie-based sessions between the client and server.
-
-2. **Session Verification Context (`GET /api/v1/auth/me`)**:
-   - **File**: [auth.py](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/app/blueprints/auth.py)
-   - **Route**: `GET /api/v1/auth/me`
-   - **Response**: Returns current authenticated user session details and profiles (Customer/Admin). Enables the React Query session checking.
-
-3. **Dedicated Customers Query Service (`GET /api/v1/customers`)**:
-   - **File**: [customers.py](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/app/blueprints/customers.py)
-   - **Route**: `GET /api/v1/customers`
-   - **Details**: Fetches all non-deleted client profiles. Dynamically resolves client tiers (`Economy` \| `Premium` \| `Luxury`) based on their highest saved quotation package grade. Admin-only.
-
-4. **Alerts Broadcast API (`POST /api/v1/notifications`)**:
-   - **File**: [notifications.py](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/app/blueprints/notifications.py)
-   - **Route**: `POST /api/v1/notifications`
-   - **Details**: Admin-only endpoint to persist custom alert messages linked to a target customer ID.
-
----
-
-## 2. API Endpoint Mapping Table
-
-The table below maps the final, verified Flask endpoints to the Next.js pages that consume them:
-
-| Next.js Frontend Page | Backend Endpoint(s) | HTTP Method | Status |
+| Module | HTTP Method | Endpoint | Consumed By |
 | :--- | :--- | :--- | :--- |
-| **All Portal Pages** | `/api/v1/auth/me` | `GET` | **Connected & Verified** |
-| `/login` (Auth Portal) | `/api/v1/auth/login` | `POST` | **Connected & Verified** |
-| | `/api/v1/auth/register` | `POST` | **Connected & Verified** |
-| | `/api/v1/auth/logout` | `POST` | **Connected & Verified** |
-| `/customer/profile` | `/api/v1/auth/profile` | `GET` / `PUT` | **Connected & Verified** |
-| `/customer/dashboard` | `/api/v1/dashboard/customer` | `GET` | **Connected & Verified** |
-| | `/api/v1/appointments` | `GET` | **Connected & Verified** |
-| | `/api/v1/notifications` | `GET` | **Connected & Verified** |
-| | `/api/v1/projects/<id>` | `GET` | **Connected & Verified** |
-| `/customer/timeline` | `/api/v1/timeline` | `GET` | **Connected & Verified** |
-| `/customer/leads` | `/api/v1/leads` | `GET` / `POST` | **Connected & Verified** |
-| `/customer/appointments` | `/api/v1/appointments` | `GET` / `POST` | **Connected & Verified** |
-| | `/api/v1/appointments/<id>` | `DELETE` (Cancel) | **Connected & Verified** |
-| `/customer/quotations` | `/api/v1/quotations` | `GET` | **Connected & Verified** |
-| | `/api/v1/quotations/<id>` | `GET` | **Connected & Verified** |
-| | `/api/v1/quotations/<id>/pdf` | `GET` (binary PDF) | **Connected & Verified** |
-| `/customer/files` | `/api/v1/files/upload` | `POST` | **Connected & Verified** |
-| | `/api/v1/files` | `GET` | **Connected & Verified** |
-| | `/api/v1/files/<id>/download`| `GET` (download) | **Connected & Verified** |
-| | `/api/v1/files/<id>` | `DELETE` (soft-delete)| **Connected & Verified** |
-| `/admin/dashboard` | `/api/v1/dashboard/admin` | `GET` | **Connected & Verified** |
-| | `/api/v1/audit-logs` | `GET` | **Connected & Verified** |
-| `/admin/customers` | `/api/v1/customers` | `GET` | **Connected & Verified** |
-| `/admin/leads` | `/api/v1/leads` | `GET` | **Connected & Verified** |
-| | `/api/v1/leads/<id>/status` | `PUT` | **Connected & Verified** |
-| | `/api/v1/leads/<id>` | `DELETE` / `PUT` (restore) | **Connected & Verified** |
-| `/admin/projects` | `/api/v1/projects` | `GET` | **Connected & Verified** |
-| | `/api/v1/projects/<id>/status` | `PUT` | **Connected & Verified** |
-| | `/api/v1/projects/<id>/progress` | `PUT` | **Connected & Verified** |
-| | `/api/v1/projects/<id>/notes` | `GET` / `POST` | **Connected & Verified** |
-| `/admin/files` | `/api/v1/files` | `GET` (includes soft-deleted) | **Connected & Verified** |
-| | `/api/v1/files/<id>/restore` | `PUT` | **Connected & Verified** |
-| `/admin/notifications` | `/api/v1/notifications` | `POST` | **Connected & Verified** |
-| `/admin/audit-logs` | `/api/v1/audit-logs` | `GET` | **Connected & Verified** |
+| **Authentication** | `GET` | `/auth/me` | `useAuth()` Global Session Provider & Layout Route Guards |
+| | `POST` | `/auth/login` | Sign In form (`/login`) |
+| | `POST` | `/auth/register` | Register Profile tab (`/login`) |
+| | `POST` | `/auth/logout` | Logout button across Sidebar Navigation |
+| | `GET` / `PUT` | `/auth/profile` | View & update profile form (`/customer/profile`) |
+| **Dashboard** | `GET` | `/dashboard/admin` | Admin dashboard statistics (`/admin/dashboard`) |
+| | `GET` | `/dashboard/customer` | Customer dashboard summaries (`/customer/dashboard`) |
+| **Leads** | `GET` / `POST` | `/leads` | Leads table list (`/admin/leads`) & Create Inquiry (`/customer/leads`) |
+| | `GET` / `DELETE` | `/leads/<id>` | Detail sheets & lead soft-deletion |
+| | `PUT` | `/leads/<id>/status` | Update status selection (`/admin/leads`) |
+| | `PUT` | `/leads/<id>/restore` | Restore lead item (`/admin/leads`) |
+| **Projects** | `GET` | `/projects` | Active projects listings (`/admin/projects`) |
+| | `GET` | `/projects/<id>` | Project board visual checklist (`/customer/dashboard`) |
+| | `PUT` | `/projects/<id>/progress` | Milestone progress slider (`/admin/projects`) |
+| | `GET` / `POST` | `/projects/<id>/notes` | Architect log input history (`/admin/projects`) |
+| **Designs** | `GET` | `/designs` | Portfolio catalog (`/gallery`) & estimator |
+| | `GET` | `/designs/<id>` | Design detail spec drawer (`/gallery/[id]`) |
+| **Quotations** | `GET` / `POST` | `/quotations` | Quotations history list (`/customer/quotations`) & Create Quote |
+| | `POST` | `/quotations/generate` | Budget estimator calculations panel |
+| | `GET` | `/quotations/<id>` | Quotation summary modal details |
+| | `DELETE` / `PUT` | `/quotations/<id>` | Soft-delete & restore quotation |
+| | `GET` | `/quotations/<id>/pdf` | ReportLab PDF stream download & print invoice modal |
+| **Files** | `GET` / `POST` | `/files` | File list grid (`/customer/files`) & File dropzone upload |
+| | `GET` / `DELETE` | `/files/<id>` | File stream download & metadata soft-delete |
+| | `PUT` | `/files/<id>/restore` | Restore deleted document (`/admin/files`) |
+| **Notifications**| `GET` / `PUT` | `/notifications` | Unread notifications drawer (`/customer/notifications`) & read marker |
+| | `POST` | `/notifications` | Dispatch Console global alert broadcast (`/admin/notifications`) |
+| **Timeline** | `GET` | `/timeline` | Visual milestone stream (`/customer/timeline`) |
+| **Audit Logs** | `GET` | `/audit-logs` | Admin activity logger (`/admin/audit-logs`) |
+| **Appointments** | `GET` / `POST` | `/appointments` | Consultation bookings list (`/customer/appointments`) & slot request |
+| | `PUT` / `DELETE` | `/appointments/<id>` | Confirm slot, mark completed, or cancel consultation |
+
+---
+
+## 2. Failed Endpoints
+
+* **None**. All requested and mapped endpoints are communicating successfully. If the local development Flask server is offline, the pages display an editorial connection error card with a retry button.
+
+---
+
+## 3. Missing Backend Routes
+
+* **None**. The three missing endpoints identified in the audit (`GET /auth/me`, `GET /customers`, and `POST /notifications`) have been successfully implemented on the Flask server and verified to operate.
+
+---
+
+## 4. Remaining Mock Implementations
+
+* **Zero**. All offline fallback data lists, static memory storage variables (`mockLeads`, `mockQuotations`, `mockFiles`, `mockAppointments`, etc.), and local success wrappers have been deleted from `src/services/` and client components.
+* All error blocks propagate the original HTTP failure context and write console logs using the standard format:
+  `console.error("METHOD /endpoint failed", error.response?.status, error.response?.data)`

@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Compass, BellRing, Send, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
+import { BellRing, Send, Sparkles, CheckCircle2 } from 'lucide-react';
+import { api } from '@/services/api';
+import { notificationService } from '@/services/notifications';
 
 interface NotificationBroadcast {
   customer_id: string;
@@ -10,19 +12,44 @@ interface NotificationBroadcast {
   message: string;
 }
 
+interface CustomerProfile {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export default function AdminNotifications() {
-  const [customerId, setCustomerId] = useState('customer-id-456'); // Default to demo customer
+  const [customerId, setCustomerId] = useState('');
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [formSuccess, setFormSuccess] = useState(false);
   const [formError, setFormError] = useState('');
 
-  // Mutation to mock triggering a broad system notification
+  // Fetch real customers list to populate options
+  const { data: customers = [], isLoading: loadingCustomers, isError: customerLoadError } = useQuery<CustomerProfile[]>({
+    queryKey: ['adminCustomers'],
+    queryFn: async () => {
+      try {
+        const response = await api.get('/customers');
+        return response.data;
+      } catch (err: any) {
+        console.error("GET /customers failed", err.response?.status, err.response?.data);
+        throw err;
+      }
+    },
+  });
+
+  // Set default selected customer once loaded
+  useEffect(() => {
+    if (customers.length > 0 && !customerId) {
+      setCustomerId(customers[0].id);
+    }
+  }, [customers, customerId]);
+
+  // Mutation to trigger real system notification broadcast
   const broadcastMutation = useMutation({
     mutationFn: async (data: NotificationBroadcast) => {
-      // Simulate network request
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { success: true };
+      return await notificationService.broadcastNotification(data);
     },
     onSuccess: () => {
       setFormSuccess(true);
@@ -30,8 +57,8 @@ export default function AdminNotifications() {
       setMessage('');
       setFormError('');
     },
-    onError: () => {
-      setFormError('Failed to dispatch global notification.');
+    onError: (error: any) => {
+      setFormError(error.response?.data?.error || 'Failed to dispatch notification to the workspace.');
     },
   });
 
@@ -39,6 +66,11 @@ export default function AdminNotifications() {
     e.preventDefault();
     setFormSuccess(false);
     setFormError('');
+
+    if (!customerId) {
+      setFormError('Please select a target customer.');
+      return;
+    }
 
     if (!title || !message) {
       setFormError('Title and message are required.');
@@ -89,15 +121,23 @@ export default function AdminNotifications() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <label className="text-[9px] uppercase font-bold tracking-wider text-charcoal/60">Target Customer Profile</label>
-            <select
-              value={customerId}
-              onChange={(e) => setCustomerId(e.target.value)}
-              className="w-full rounded-xl border border-gold/20 bg-white/50 px-4 py-2.5 text-xs outline-none focus:border-gold smooth-transition"
-            >
-              <option value="customer-id-456">Jaisveen Kaur (jaisveen@gmail.com)</option>
-              <option value="customer-id-789">Robert Downey (robert@stark.com)</option>
-              <option value="customer-id-101">Clara Oswald (clara@tardis.com)</option>
-            </select>
+            {loadingCustomers ? (
+              <div className="text-xs text-gold animate-pulse">Loading customer profiles...</div>
+            ) : customerLoadError ? (
+              <div className="text-xs text-red-500">Failed to load target customers. Make sure the database is seeded.</div>
+            ) : (
+              <select
+                value={customerId}
+                onChange={(e) => setCustomerId(e.target.value)}
+                className="w-full rounded-xl border border-gold/20 bg-white/50 px-4 py-2.5 text-xs outline-none focus:border-gold smooth-transition"
+              >
+                {customers.map((cust) => (
+                  <option key={cust.id} value={cust.id}>
+                    {cust.name} ({cust.email})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -126,7 +166,7 @@ export default function AdminNotifications() {
 
           <button
             type="submit"
-            disabled={broadcastMutation.isPending}
+            disabled={broadcastMutation.isPending || loadingCustomers || customers.length === 0}
             className="w-full py-3.5 bg-gold-gradient text-white rounded-full text-xs font-bold uppercase tracking-widest hover:shadow-lg transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:translate-y-0 flex items-center justify-center gap-1.5 cursor-pointer mt-2"
           >
             <Send className="h-3.5 w-3.5" />
