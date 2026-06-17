@@ -74,7 +74,7 @@ export default function AdminQuotations() {
   // Fetch quotations list
   const { data: quotesData, isLoading, isError, refetch } = useQuery({
     queryKey: ['adminQuotations'],
-    queryFn: () => quotationService.getQuotations({ per_page: 1000 }),
+    queryFn: () => quotationService.getQuotations({ per_page: 100 }),
   });
 
   // Highlight or focus on calculator if ?create=true query parameter is present

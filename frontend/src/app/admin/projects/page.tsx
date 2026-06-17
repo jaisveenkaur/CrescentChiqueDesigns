@@ -78,7 +78,7 @@ export default function AdminProjects() {
   // Fetch all quotations to filter by selected customer
   const { data: quotationsResp } = useQuery({
     queryKey: ['adminAllQuotationsForProjects'],
-    queryFn: () => quotationService.getQuotations({ per_page: 1000 })
+    queryFn: () => quotationService.getQuotations({ per_page: 100 })
   });
   const quotations = quotationsResp?.items || [];
 
