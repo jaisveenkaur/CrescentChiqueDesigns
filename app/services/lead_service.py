@@ -92,7 +92,7 @@ class LeadService:
             raise ValueError("Unauthorized role access")
             
         # Apply filters
-        if 'status' in filters and filters['status']:
+        if 'status' in filters and filters['status'] and filters['status'] != 'all':
             query = query.filter(Lead.status == filters['status'])
             
         if 'name' in filters and filters['name']:
