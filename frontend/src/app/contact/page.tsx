@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useMutation } from '@tanstack/react-query';
-import { Compass, Mail, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
 import PublicNav from '@/components/public-nav';
 import Footer from '@/components/footer';
 import { leadService } from '@/services/leads';
+import { CrescentMoonIcon } from '@/components/brand';
 
 export default function Contact() {
   const [name, setName] = useState('');
@@ -60,7 +61,7 @@ export default function Contact() {
           {/* Contact Details Card */}
           <div className="lg:col-span-5 bg-charcoal text-white rounded-3xl p-8 sm:p-10 border border-gold/10 shadow-2xl flex flex-col gap-8">
             <div className="flex flex-col gap-2">
-              <Compass className="h-8 w-8 text-gold" />
+              <CrescentMoonIcon className="h-8 w-8 text-gold" />
               <h3 className="font-serif text-2xl font-semibold mt-2">Crescent Chique Studio</h3>
               <p className="text-white/60 text-xs leading-relaxed">
                 Connect with our concierge. We coordinate structural designs across luxury residential apartments, villas, penthouses and commercial lobbies.

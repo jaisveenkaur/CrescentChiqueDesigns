@@ -11,11 +11,11 @@ import {
   FolderOpen, 
   Bell, 
   User, 
-  Compass, 
   LogOut, 
   Inbox,
   Menu
 } from 'lucide-react';
+import { Logo } from './brand';
 
 export default function CustomerNav() {
   const pathname = usePathname();
@@ -64,13 +64,10 @@ export default function CustomerNav() {
       <aside className="hidden md:flex flex-col w-64 bg-charcoal text-white min-h-screen border-r border-gold/15 sticky top-0">
         {/* Brand header */}
         <div className="p-6 border-b border-white/10">
-          <Link href="/" className="flex items-center gap-2">
-            <Compass className="h-6 w-6 text-gold" />
-            <span className="font-serif text-base font-bold tracking-widest text-white">
-              CRESCENT <span className="text-gold">CHIQUE</span>
-            </span>
+          <Link href="/" className="flex items-center shrink-0">
+            <Logo variant="dark" size="sm" />
           </Link>
-          <span className="text-[10px] text-gold/60 uppercase tracking-widest font-semibold block mt-1">
+          <span className="text-[10px] text-gold/60 uppercase tracking-widest font-semibold block mt-2">
             Client Portal
           </span>
         </div>

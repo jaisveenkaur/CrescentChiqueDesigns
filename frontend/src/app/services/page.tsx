@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Compass, PenTool, LayoutTemplate, Hammer, Gem, ArrowRight } from 'lucide-react';
+import { PenTool, LayoutTemplate, Hammer, Gem, ArrowRight } from 'lucide-react';
 import PublicNav from '@/components/public-nav';
 import Footer from '@/components/footer';
+import { CrescentMoonIcon } from '@/components/brand';
 
 export default function Services() {
   const servicePillars = [
@@ -68,7 +69,7 @@ export default function Services() {
         {/* Callout Section */}
         <div className="bg-charcoal text-white rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-xl border border-gold/10">
           <div className="absolute inset-0 z-0 opacity-15">
-            <Compass className="absolute -right-20 -bottom-20 w-[400px] h-[400px] text-gold" />
+            <CrescentMoonIcon className="absolute -right-20 -bottom-20 w-[400px] h-[400px] text-gold" />
           </div>
           
           <div className="relative z-10 max-w-2xl flex flex-col gap-6">

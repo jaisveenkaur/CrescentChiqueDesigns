@@ -27,7 +27,13 @@ export const projectService = {
   getProjects: async (): Promise<Project[]> => {
     try {
       const response = await api.get('/projects');
-      return response.data;
+      if (response.data && Array.isArray(response.data.items)) {
+        return response.data.items;
+      }
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      return [];
     } catch (error: any) {
       console.error(
         "GET /projects failed",
@@ -91,7 +97,7 @@ export const projectService = {
   ): Promise<ProjectNote> => {
     try {
       const response = await api.post(`/projects/${projectId}/notes`, { note });
-      return response.data;
+      return response.data.note;
     } catch (error: any) {
       console.error(
         `POST /projects/${projectId}/notes failed`,

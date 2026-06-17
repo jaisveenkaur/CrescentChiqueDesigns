@@ -12,10 +12,10 @@ import {
   FolderLock, 
   BellRing, 
   FileTerminal, 
-  Compass, 
   LogOut,
   Menu
 } from 'lucide-react';
+import { Logo } from './brand';
 
 export default function AdminNav() {
   const pathname = usePathname();
@@ -61,13 +61,10 @@ export default function AdminNav() {
       <aside className="hidden md:flex flex-col w-64 bg-charcoal text-white min-h-screen border-r border-gold/15 sticky top-0">
         {/* Brand header */}
         <div className="p-6 border-b border-white/10">
-          <Link href="/" className="flex items-center gap-2">
-            <Compass className="h-6 w-6 text-gold" />
-            <span className="font-serif text-base font-bold tracking-widest text-white">
-              CRESCENT <span className="text-gold">CHIQUE</span>
-            </span>
+          <Link href="/" className="flex items-center shrink-0">
+            <Logo variant="dark" size="sm" />
           </Link>
-          <span className="text-[10px] text-gold uppercase tracking-widest font-bold block mt-1">
+          <span className="text-[10px] text-gold uppercase tracking-widest font-bold block mt-2">
             Studio Administrator
           </span>
         </div>

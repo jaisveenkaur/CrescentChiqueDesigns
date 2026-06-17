@@ -56,6 +56,7 @@ def get_projects():
         response_items.append({
             "id": p.id,
             "customer_id": p.customer_id,
+            "customer_name": p.customer.user.name if p.customer and p.customer.user else "Unknown",
             "quotation_id": p.quotation_id,
             "project_status": p.project_status,
             "progress_percentage": int(p.progress_percentage),
@@ -88,6 +89,7 @@ def get_project_details(project_id):
     return jsonify({
         "id": project.id,
         "customer_id": project.customer_id,
+        "customer_name": project.customer.user.name if project.customer and project.customer.user else "Unknown",
         "quotation_id": project.quotation_id,
         "project_status": project.project_status,
         "progress_percentage": int(project.progress_percentage),

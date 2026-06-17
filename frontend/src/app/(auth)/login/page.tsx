@@ -5,17 +5,21 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { Compass, Lock, Mail, User, Phone, MapPin, Sparkles, ArrowLeft } from 'lucide-react';
+import { Lock, Mail, User, Phone, MapPin, Sparkles, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/services/auth-service';
 import { authService } from '@/services/auth';
 import { api } from '@/services/api';
+import { Logo, CrescentMoonIcon } from '@/components/brand';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionExpired = searchParams.get('expired') === 'true';
+  const { login: contextLogin } = useAuth();
 
   // Toggle Login vs Signup state
   const [isLogin, setIsLogin] = useState(true);
+  const [loginRole, setLoginRole] = useState<'customer' | 'admin'>('customer');
 
   // Form states
   const [email, setEmail] = useState('');
@@ -30,7 +34,6 @@ function LoginContent() {
   const [infoMsg, setInfoMsg] = useState('');
 
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'unreachable'>('checking');
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001/api/v1';
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -57,7 +60,7 @@ function LoginContent() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: (data: { email: string; password?: string }) =>
-      authService.login(data.email, data.password || 'password123'),
+      contextLogin(data.email, data.password || 'password123'),
     onSuccess: (data) => {
       const role = data.user.role;
       if (role === 'admin') {
@@ -112,20 +115,7 @@ function LoginContent() {
     }
   };
 
-  // Quick roles login helpers
-  const handleQuickLogin = (role: 'customer' | 'admin') => {
-    setErrorMsg('');
-    setInfoMsg('');
-    if (role === 'admin') {
-      setEmail('admin@crescentchique.com');
-      setPassword('adminPass123');
-      loginMutation.mutate({ email: 'admin@crescentchique.com', password: 'adminPass123' });
-    } else {
-      setEmail('jaisveen@gmail.com');
-      setPassword('clientPass123');
-      loginMutation.mutate({ email: 'jaisveen@gmail.com', password: 'clientPass123' });
-    }
-  };
+
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-beige-soft text-charcoal">
@@ -144,11 +134,8 @@ function LoginContent() {
         
         {/* Editorial overlay content */}
         <div className="relative z-10 flex flex-col justify-between h-full w-full text-white">
-          <Link href="/" className="flex items-center gap-2 text-white hover:text-gold smooth-transition self-start">
-            <Compass className="h-6 w-6 text-gold" />
-            <span className="font-serif text-lg font-bold tracking-widest">
-              CRESCENT <span className="text-gold">CHIQUE</span>
-            </span>
+          <Link href="/" className="flex items-center shrink-0 self-start">
+            <Logo variant="dark" size="sm" />
           </Link>
 
           <div className="flex flex-col gap-4 max-w-md my-auto">
@@ -178,18 +165,64 @@ function LoginContent() {
           <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase text-charcoal/70 hover:text-gold smooth-transition">
             <ArrowLeft className="h-4 w-4" /> Exit to Website
           </Link>
-          <Compass className="md:hidden h-5 w-5 text-gold" />
+          <CrescentMoonIcon className="md:hidden h-5 w-5 text-gold" />
         </div>
 
         <div className="w-full max-w-md glass-card rounded-3xl p-8 sm:p-10 border border-gold/15 shadow-xl bg-white/40">
+          {/* Role selector tabs */}
+          {isLogin && (
+            <div className="flex border-b border-gold/10 pb-4 mb-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginRole('customer');
+                  setEmail('');
+                  setPassword('');
+                  setErrorMsg('');
+                  setInfoMsg('');
+                }}
+                className={`flex-1 pb-2 text-center text-xs font-bold uppercase tracking-wider smooth-transition border-b-2 cursor-pointer ${
+                  loginRole === 'customer'
+                    ? 'border-gold text-gold'
+                    : 'border-transparent text-charcoal/50 hover:text-charcoal'
+                }`}
+              >
+                Client Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginRole('admin');
+                  setEmail('');
+                  setPassword('');
+                  setErrorMsg('');
+                  setInfoMsg('');
+                }}
+                className={`flex-1 pb-2 text-center text-xs font-bold uppercase tracking-wider smooth-transition border-b-2 cursor-pointer ${
+                  loginRole === 'admin'
+                    ? 'border-gold text-gold'
+                    : 'border-transparent text-charcoal/50 hover:text-charcoal'
+                }`}
+              >
+                Admin Sign In
+              </button>
+            </div>
+          )}
+
           <div className="text-center mb-8">
             <h2 className="font-serif text-3xl font-semibold">
-              {isLogin ? 'Client Portal Sign In' : 'Create Client Profile'}
+              {!isLogin 
+                ? 'Create Client Profile' 
+                : loginRole === 'admin' 
+                  ? 'Admin Portal Sign In' 
+                  : 'Client Portal Sign In'}
             </h2>
             <p className="text-[11px] text-charcoal/60 mt-2">
-              {isLogin 
-                ? 'Sign in to review timeline status, file uploads, and project updates.' 
-                : 'Complete the form to register your active design workspace.'}
+              {!isLogin 
+                ? 'Complete the form to register your active design workspace.' 
+                : loginRole === 'admin' 
+                  ? 'Sign in to review business inquiries, customer accounts, and manage projects.' 
+                  : 'Sign in to review timeline status, file uploads, and project updates.'}
             </p>
           </div>
 
@@ -328,42 +361,30 @@ function LoginContent() {
           </form>
 
           {/* Toggle Login/Signup */}
-          <div className="text-center mt-6 text-xs border-t border-gold/10 pt-4">
-            <span className="text-charcoal/60">
-              {isLogin ? 'New to Crescent Chique? ' : 'Already registered? '}
-            </span>
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setErrorMsg('');
-                setInfoMsg('');
-              }}
-              className="text-gold font-semibold hover:underline"
-            >
-              {isLogin ? 'Create Profile' : 'Sign In'}
-            </button>
-          </div>
-
-          {/* Quick Demo logins helpers */}
-          {isLogin && (
-            <div className="mt-6 border-t border-gold/10 pt-4 flex flex-col gap-2.5">
-              <span className="text-[9px] uppercase font-bold tracking-wider text-center text-charcoal/50">Demo Accounts Fast-Track</span>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => handleQuickLogin('customer')}
-                  className="py-2 rounded-lg bg-gold/5 border border-gold/20 text-gold text-[10px] font-bold uppercase tracking-wider hover:bg-gold/10 smooth-transition"
-                >
-                  Customer Login
-                </button>
-                <button
-                  onClick={() => handleQuickLogin('admin')}
-                  className="py-2 rounded-lg bg-charcoal/5 border border-charcoal/20 text-charcoal text-[10px] font-bold uppercase tracking-wider hover:bg-charcoal/10 smooth-transition"
-                >
-                  Admin Login
-                </button>
-              </div>
+          {loginRole === 'customer' ? (
+            <div className="text-center mt-6 text-xs border-t border-gold/10 pt-4">
+              <span className="text-charcoal/60">
+                {isLogin ? 'New to Crescent Chique? ' : 'Already registered? '}
+              </span>
+              <button
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setErrorMsg('');
+                  setInfoMsg('');
+                }}
+                className="text-gold font-semibold hover:underline"
+              >
+                {isLogin ? 'Create Profile' : 'Sign In'}
+              </button>
             </div>
+          ) : (
+            isLogin && (
+              <div className="text-center mt-6 text-xs border-t border-gold/10 pt-4 text-charcoal/50">
+                Admin accounts are pre-provisioned by the studio operations board.
+              </div>
+            )
           )}
+
 
           {/* Backend Connection Status */}
           <div className="mt-6 border-t border-gold/10 pt-4 flex flex-col items-center gap-1.5 text-[9px]">
@@ -386,9 +407,6 @@ function LoginContent() {
                  'CHECKING STATUS...'}
               </span>
             </div>
-            <span className="font-mono text-charcoal/40 text-[8px] truncate max-w-[280px]">
-              URL: {apiUrl}
-            </span>
           </div>
         </div>
       </div>

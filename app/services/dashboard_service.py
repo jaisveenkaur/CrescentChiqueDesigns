@@ -49,6 +49,22 @@ class DashboardService:
 
         deleted_files = db.session.query(func.count(File.id)).filter(File.is_deleted == True).scalar() or 0
 
+        # Compute total non-deleted projects
+        total_projects = db.session.query(func.count(Project.id)).filter(Project.is_deleted == False).scalar() or 0
+
+        # Query recent activities from AuditLog
+        from app.models import AuditLog
+        recent_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(5).all()
+        recent_activities = []
+        for log in recent_logs:
+            recent_activities.append({
+                "id": log.id,
+                "action": log.action,
+                "details": log.details or "",
+                "timestamp": log.timestamp.isoformat(),
+                "user_name": log.user.name if log.user else "System"
+            })
+
         return {
             "total_customers": total_customers,
             "total_leads": total_leads,
@@ -58,12 +74,15 @@ class DashboardService:
             "approved_quotations": approved_quotations,
             "active_projects": active_projects,
             "completed_projects": completed_projects,
+            "total_projects": total_projects,
             "pending_appointments": pending_appointments,
             "completed_appointments": completed_appointments,
             "uploaded_files": uploaded_files,
             "deleted_files": deleted_files,
             "average_project_progress": avg_progress,
-            "average_progress": avg_progress
+            "average_progress": avg_progress,
+            "average_progress_percentage": avg_progress,
+            "recent_activities": recent_activities
         }
 
     @classmethod
@@ -118,6 +137,43 @@ class DashboardService:
 
         active_files = uploaded_files
 
+        # Compute total customer appointments
+        total_appointments = db.session.query(func.count(Appointment.id)).filter(
+            Appointment.customer_id == customer_id,
+            Appointment.is_deleted == False
+        ).scalar() or 0
+
+        # Query latest active project details
+        latest_project = Project.query.filter(
+            Project.customer_id == customer_id,
+            Project.is_deleted == False,
+            Project.project_status != 'Completed'
+        ).order_by(Project.created_at.desc()).first()
+
+        active_project_data = None
+        if latest_project:
+            active_project_data = {
+                "id": latest_project.id,
+                "project_status": latest_project.project_status,
+                "progress_percentage": int(latest_project.progress_percentage),
+                "expected_completion": latest_project.expected_completion.isoformat() if latest_project.expected_completion else None
+            }
+
+        # Query latest unread/read notifications
+        recent_notifs = Notification.query.filter_by(
+            customer_id=customer_id,
+            is_deleted=False
+        ).order_by(Notification.created_at.desc()).limit(5).all()
+
+        recent_notifications_data = []
+        for n in recent_notifs:
+            recent_notifications_data.append({
+                "id": n.id,
+                "title": n.title,
+                "message": n.message,
+                "created_at": n.created_at.isoformat()
+            })
+
         # Get active projects detailed list with progress percentage
         active_projects_list = Project.query.filter(
             Project.customer_id == customer_id,
@@ -144,5 +200,11 @@ class DashboardService:
             "total_notifications": total_notifications,
             "unread_notifications": unread_notifications,
             "uploaded_files": uploaded_files,
-            "active_files": active_files
+            "active_files": active_files,
+            
+            # Frontend aligned keys
+            "total_appointments": total_appointments,
+            "total_files": uploaded_files,
+            "active_project": active_project_data,
+            "recent_notifications": recent_notifications_data
         }

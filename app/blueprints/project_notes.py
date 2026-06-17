@@ -50,7 +50,10 @@ def add_project_note(project_id):
             "message": "Project note added successfully",
             "note": {
                 "id": note_record.id,
+                "project_id": note_record.project_id,
                 "note": note_record.note,
+                "created_by": note_record.created_by,
+                "creator_name": note_record.creator.name if note_record.creator else "Architect",
                 "created_at": note_record.created_at.isoformat()
             }
         }), 201
@@ -87,7 +90,11 @@ def get_project_notes(project_id):
         
         response_data = [
             {
+                "id": n.id,
+                "project_id": n.project_id,
                 "note": n.note,
+                "created_by": n.created_by,
+                "creator_name": n.creator.name if n.creator else "Architect",
                 "created_at": n.created_at.isoformat()
             } for n in notes
         ]

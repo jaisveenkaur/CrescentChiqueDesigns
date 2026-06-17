@@ -21,6 +21,17 @@ export const GoldFoilGradient = () => (
   </defs>
 );
 
+export const CrescentMoonIcon: React.FC<{ className?: string }> = ({ className = 'h-6 w-6' }) => {
+  return (
+    <svg viewBox="0 0 100 100" className={`${className} select-none`} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M65 80C42.9 80 25 62.1 25 40C25 22.5 36.2 7.3 53 1.5C32.8 5 17.8 22.7 17.8 44C17.8 67.8 37.2 87 61 87C73.1 87 84 80.2 90 70C83.7 76.5 75.1 80 65 80Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+};
+
 interface LogoProps {
   variant?: 'primary' | 'monogram' | 'gold-foil' | 'dark';
   className?: string;
