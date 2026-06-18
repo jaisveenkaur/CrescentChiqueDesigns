@@ -25,6 +25,12 @@ class Config:
         f"mysql+pymysql://{DB_USER}:{encoded_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
     
+    # Upload storage directory
+    UPLOAD_FOLDER = os.environ.get(
+        'UPLOAD_FOLDER',
+        os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app', 'static', 'uploads')
+    )
+    
     # Flask-Mail configuration parameters
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'localhost')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 1025))
@@ -48,6 +54,12 @@ class ProductionConfig(Config):
     DEBUG = False
     # In production environments, DATABASE_URL must be explicitly provided
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    
+    # Session cookie properties for cross-domain support in production (SameSite=None, Secure=True)
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'None'
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SAMESITE = 'None'
 
 
 config_by_name = {

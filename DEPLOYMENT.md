@@ -22,6 +22,12 @@ DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=crescent_chique_db
 
+# CORS Config (Comma-separated list of allowed domains in production)
+ALLOWED_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://crescentchique.vercel.app
+
+# Persistent File Upload storage directory
+UPLOAD_FOLDER=/mnt/persistent_uploads
+
 # Alternative: Direct Connection URL (If set, overrides individual DB parameters)
 # DATABASE_URL=mysql+pymysql://root:password@localhost:3306/crescent_chique_db
 
@@ -94,6 +100,17 @@ flask db migrate -m "Initialize database schema"
 
 # Apply changes to MySQL database
 flask db upgrade
+```
+
+### Step 4: Automating Database Backups
+To run a manual database backup (which exports a compressed `.sql.gz` file into a `backups/` directory):
+```bash
+chmod +x scripts/backup_db.sh
+./scripts/backup_db.sh
+```
+To automate periodic backups in production, register the script inside the crontab:
+```bash
+0 2 * * * /path/to/project/scripts/backup_db.sh >> /var/log/db_backup.log 2>&1
 ```
 
 ---

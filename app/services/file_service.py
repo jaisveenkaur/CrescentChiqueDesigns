@@ -71,7 +71,10 @@ class FileService:
         unique_name = f"{uuid.uuid4()}.{ext}"
         
         # Build uploads directory paths
-        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+        upload_folder = current_app.config.get(
+            'UPLOAD_FOLDER',
+            os.path.join(current_app.root_path, 'static', 'uploads')
+        )
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
             
@@ -162,7 +165,10 @@ class FileService:
                 
         # Physical path resolution
         # file_url is e.g. "/static/uploads/<uuid>.<ext>"
-        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+        upload_folder = current_app.config.get(
+            'UPLOAD_FOLDER',
+            os.path.join(current_app.root_path, 'static', 'uploads')
+        )
         filename = os.path.basename(file_record.file_url)
         filepath = os.path.join(upload_folder, filename)
         

@@ -20,7 +20,11 @@ def create_app(config_name=None):
     
     # Configure Flask-CORS for secure cross-origin sessions
     from flask_cors import CORS
-    CORS(app, supports_credentials=True, origins=['http://localhost:3000', 'http://127.0.0.1:3000'])
+    allowed_origins = os.environ.get(
+        'ALLOWED_CORS_ORIGINS',
+        'http://localhost:3000,http://127.0.0.1:3000'
+    ).split(',')
+    CORS(app, supports_credentials=True, origins=allowed_origins)
 
     
     # Configure Flask-Login settings
