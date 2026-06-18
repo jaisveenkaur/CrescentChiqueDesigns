@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { dashboardService, CustomerDashboardMetrics } from '@/services/dashboard';
 import { quotationService, Quotation } from '@/services/quotations';
 import { Logo } from '@/components/brand';
+import { SafeDate } from '@/components/safe-date';
 
 export default function CustomerDashboard() {
   const [userName, setUserName] = useState('Valued Client');
@@ -191,11 +192,7 @@ export default function CustomerDashboard() {
                   <span className="text-charcoal/50 block font-medium">Expected Completion</span>
                   <span className="font-semibold text-charcoal/90 mt-0.5 block">
                     {metrics.active_project.expected_completion 
-                      ? new Date(metrics.active_project.expected_completion).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })
+                      ? <SafeDate date={metrics.active_project.expected_completion} options={{ month: 'short', day: 'numeric', year: 'numeric' }} />
                       : 'To Be Decided'}
                   </span>
                 </div>
@@ -386,8 +383,8 @@ export default function CustomerDashboard() {
                   >
                     <div className="flex justify-between items-start gap-2">
                       <h4 className="font-semibold text-xs text-charcoal">{notif.title}</h4>
-                      <span className="text-[8px] text-charcoal/40 font-mono">
-                        {new Date(notif.created_at).toLocaleDateString()}
+                      <span className="text-[8px] text-charcoal/40 font-mono self-start mt-0.5 shrink-0">
+                        <SafeDate date={notif.created_at} />
                       </span>
                     </div>
                     <p className="text-[10px] text-charcoal/70 leading-relaxed">{notif.message}</p>
@@ -439,10 +436,10 @@ export default function CustomerDashboard() {
                     INV-CC-{selectedInvoice.id.substring(0, 8).toUpperCase()}
                   </span>
                   <span className="text-[10px] text-charcoal/50">
-                    Invoice Date: {new Date(selectedInvoice.created_at).toLocaleDateString()}
+                    Invoice Date: <SafeDate date={selectedInvoice.created_at} />
                   </span>
                   <span className="text-[10px] text-charcoal/50">
-                    Due Date: {new Date(new Date(selectedInvoice.created_at).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                    Due Date: <SafeDate date={new Date(new Date(selectedInvoice.created_at).getTime() + 30 * 24 * 60 * 60 * 1000)} />
                   </span>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Compass, FileTerminal, Search, RefreshCw, ShieldAlert, Sliders } from 'lucide-react';
 import { dashboardService, AuditLog } from '@/services/dashboard';
+import { SafeDate } from '@/components/safe-date';
 
 export default function AdminAuditLogs() {
   const [actionFilter, setActionFilter] = useState('all');
@@ -118,7 +119,7 @@ export default function AdminAuditLogs() {
                   </div>
 
                   <span className="text-[9px] font-mono text-charcoal/40 shrink-0 self-end sm:self-center">
-                    {new Date(log.timestamp).toLocaleString()}
+                    <SafeDate date={log.timestamp} showTime={true} />
                   </span>
                 </div>
               ))}

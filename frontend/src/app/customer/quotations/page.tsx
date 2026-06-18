@@ -6,6 +6,7 @@ import { FileText, Download, RefreshCw, Coins, X, Printer, Receipt } from 'lucid
 import { motion, AnimatePresence } from 'framer-motion';
 import { quotationService, Quotation } from '@/services/quotations';
 import { Logo } from '@/components/brand';
+import { SafeDate } from '@/components/safe-date';
 
 export default function CustomerQuotations() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -110,11 +111,7 @@ export default function CustomerQuotations() {
                       Estimate for {quote.area_sqft} sqft Space
                     </h3>
                     <p className="text-[10px] text-charcoal/50">
-                      Calculated on {new Date(quote.created_at).toLocaleDateString(undefined, {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
+                      Calculated on <SafeDate date={quote.created_at} options={{ month: 'long', day: 'numeric', year: 'numeric' }} />
                     </p>
                   </div>
 
@@ -266,10 +263,10 @@ export default function CustomerQuotations() {
                     INV-CC-{selectedInvoice.id.substring(0, 8).toUpperCase()}
                   </span>
                   <span className="text-[10px] text-charcoal/50">
-                    Invoice Date: {new Date(selectedInvoice.created_at).toLocaleDateString()}
+                    Invoice Date: <SafeDate date={selectedInvoice.created_at} />
                   </span>
                   <span className="text-[10px] text-charcoal/50">
-                    Due Date: {new Date(new Date(selectedInvoice.created_at).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                    Due Date: <SafeDate date={new Date(new Date(selectedInvoice.created_at).getTime() + 30 * 24 * 60 * 60 * 1000)} />
                   </span>
                 </div>
               </div>
