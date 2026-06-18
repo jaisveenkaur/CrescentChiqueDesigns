@@ -286,7 +286,7 @@ export default function CustomerDashboard() {
                     {/* Cost row */}
                     <div className="flex justify-between items-center text-xs font-semibold border-t border-gold/5 pt-2">
                       <span className="text-charcoal/50">Estimated Budget</span>
-                      <span className="text-gold font-bold font-serif text-sm">${quote.total_amount.toLocaleString()}</span>
+                      <span className="text-gold font-bold font-serif text-sm">₹{quote.total_amount.toLocaleString()}</span>
                     </div>
 
                     {/* Stacked Percentage Budget Bar */}
@@ -479,28 +479,28 @@ export default function CustomerDashboard() {
                         <span className="font-medium block">Spatial Concept Design & Consultations</span>
                         <span className="text-[10px] text-charcoal/50 block">Architectural layouts, 3D renderings, moodboards & site audits.</span>
                       </div>
-                      <div className="col-span-4 text-right self-center">${selectedInvoice.design_cost.toLocaleString()}</div>
+                      <div className="col-span-4 text-right self-center">₹{selectedInvoice.design_cost.toLocaleString()}</div>
                     </div>
                     <div className="grid grid-cols-12 p-3 text-charcoal/80">
                       <div className="col-span-8">
                         <span className="font-medium block">Material & Procurement Specifications</span>
                         <span className="text-[10px] text-charcoal/50 block">Premium Greek marble slabs, veneer panelling, and customized hardware.</span>
                       </div>
-                      <div className="col-span-4 text-right self-center">${selectedInvoice.material_cost.toLocaleString()}</div>
+                      <div className="col-span-4 text-right self-center">₹{selectedInvoice.material_cost.toLocaleString()}</div>
                     </div>
                     <div className="grid grid-cols-12 p-3 text-charcoal/80">
                       <div className="col-span-8">
                         <span className="font-medium block">Construction Labor & Project Management</span>
                         <span className="text-[10px] text-charcoal/50 block">Certified carpentry works, civil customizations & turnkey installations.</span>
                       </div>
-                      <div className="col-span-4 text-right self-center">${selectedInvoice.labour_cost.toLocaleString()}</div>
+                      <div className="col-span-4 text-right self-center">₹{selectedInvoice.labour_cost.toLocaleString()}</div>
                     </div>
                     <div className="grid grid-cols-12 p-3 text-charcoal/80 bg-beige-dark/10">
                       <div className="col-span-8">
                         <span className="font-medium block">Goods & Services Tax (GST 18%)</span>
                         <span className="text-[10px] text-charcoal/50 block">Statutory central & state taxation on construction contracts.</span>
                       </div>
-                      <div className="col-span-4 text-right self-center">${selectedInvoice.tax_amount.toLocaleString()}</div>
+                      <div className="col-span-4 text-right self-center">₹{selectedInvoice.tax_amount.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
@@ -515,7 +515,7 @@ export default function CustomerDashboard() {
                 <div className="flex flex-col items-end gap-0.5">
                   <span className="text-xs uppercase font-bold text-charcoal/40">Grand Total Net Budget</span>
                   <span className="font-serif font-extrabold text-gold text-2xl">
-                    ${selectedInvoice.total_amount.toLocaleString()}
+                    ₹{selectedInvoice.total_amount.toLocaleString()}
                   </span>
                 </div>
               </div>

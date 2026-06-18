@@ -140,7 +140,7 @@ export default function Gallery() {
                           </p>
                           <div className="border-t border-gold/10 mt-3 pt-3 flex justify-between items-center text-[10px] uppercase tracking-wider text-charcoal/50">
                             <span>Estimated Budget</span>
-                            <span className="font-semibold text-gold font-serif text-xs">${design.price_per_sqft}/sqft</span>
+                            <span className="font-semibold text-gold font-serif text-xs">₹{design.price_per_sqft}/sqft</span>
                           </div>
                         </div>
                       </Link>

@@ -170,7 +170,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                 </div>
                 <div>
                   <span className="text-charcoal/50 block font-medium">Base Price Estimate</span>
-                  <span className="font-serif font-bold text-gold text-sm mt-0.5 block">${design.price_per_sqft} / sqft</span>
+                  <span className="font-serif font-bold text-gold text-sm mt-0.5 block">₹{design.price_per_sqft} / sqft</span>
                 </div>
                 <div>
                   <span className="text-charcoal/50 block font-medium">Estimated Timeline</span>
@@ -243,23 +243,23 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                   <h4 className="font-semibold text-charcoal/70 uppercase text-[10px] tracking-wider mb-2">Estimated Costs Breakdown</h4>
                   <div className="flex justify-between">
                     <span className="text-charcoal/60">Design Consultation Fees</span>
-                    <span className="font-semibold text-charcoal/90">${estimationResult.design_cost.toLocaleString()}</span>
+                    <span className="font-semibold text-charcoal/90">₹{estimationResult.design_cost.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-charcoal/60">Estimated Material Cost</span>
-                    <span className="font-semibold text-charcoal/90">${estimationResult.material_cost.toLocaleString()}</span>
+                    <span className="font-semibold text-charcoal/90">₹{estimationResult.material_cost.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-charcoal/60">Estimated Labour Cost</span>
-                    <span className="font-semibold text-charcoal/90">${estimationResult.labour_cost.toLocaleString()}</span>
+                    <span className="font-semibold text-charcoal/90">₹{estimationResult.labour_cost.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-charcoal/60">GST (18%)</span>
-                    <span className="font-semibold text-charcoal/90">${estimationResult.tax_amount.toLocaleString()}</span>
+                    <span className="font-semibold text-charcoal/90">₹{estimationResult.tax_amount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between border-t border-gold/15 mt-2 pt-2 text-sm">
                     <span className="font-semibold text-charcoal">Total Budget Estimate</span>
-                    <span className="font-serif font-bold text-gold text-base">${estimationResult.total_amount.toLocaleString()}</span>
+                    <span className="font-serif font-bold text-gold text-base">₹{estimationResult.total_amount.toLocaleString()}</span>
                   </div>
 
                   <div className="mt-4 bg-gold/5 p-3 rounded-lg border border-gold/15 text-[10px] text-charcoal/80 leading-relaxed">

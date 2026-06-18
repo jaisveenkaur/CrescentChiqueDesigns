@@ -144,19 +144,19 @@ export default function CustomerQuotations() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white/40 p-4 rounded-xl border border-gold/5 text-xs text-charcoal/70">
                   <div>
                     <span className="text-charcoal/40 font-medium block">Design Cost</span>
-                    <span className="font-semibold block mt-0.5">${quote.design_cost.toLocaleString()}</span>
+                    <span className="font-semibold block mt-0.5">₹{quote.design_cost.toLocaleString()}</span>
                   </div>
                   <div>
                     <span className="text-charcoal/40 font-medium block">Material Cost</span>
-                    <span className="font-semibold block mt-0.5">${quote.material_cost.toLocaleString()}</span>
+                    <span className="font-semibold block mt-0.5">₹{quote.material_cost.toLocaleString()}</span>
                   </div>
                   <div>
                     <span className="text-charcoal/40 font-medium block">Labour Cost</span>
-                    <span className="font-semibold block mt-0.5">${quote.labour_cost.toLocaleString()}</span>
+                    <span className="font-semibold block mt-0.5">₹{quote.labour_cost.toLocaleString()}</span>
                   </div>
                   <div>
                     <span className="text-charcoal/40 font-medium block">GST (18%)</span>
-                    <span className="font-semibold block mt-0.5">${quote.tax_amount.toLocaleString()}</span>
+                    <span className="font-semibold block mt-0.5">₹{quote.tax_amount.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -217,7 +217,7 @@ export default function CustomerQuotations() {
                     <Coins className="h-4 w-4 text-gold" /> Estimated Net Budget
                   </div>
                   <div className="font-serif font-bold text-gold text-xl sm:text-2xl">
-                    ${quote.total_amount.toLocaleString()}
+                    ₹{quote.total_amount.toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -306,28 +306,28 @@ export default function CustomerQuotations() {
                         <span className="font-medium block">Spatial Concept Design & Consultations</span>
                         <span className="text-[10px] text-charcoal/50 block">Architectural layouts, 3D renderings, moodboards & site audits.</span>
                       </div>
-                      <div className="col-span-4 text-right self-center">${selectedInvoice.design_cost.toLocaleString()}</div>
+                      <div className="col-span-4 text-right self-center">₹{selectedInvoice.design_cost.toLocaleString()}</div>
                     </div>
                     <div className="grid grid-cols-12 p-3 text-charcoal/80">
                       <div className="col-span-8">
                         <span className="font-medium block">Material & Procurement Specifications</span>
                         <span className="text-[10px] text-charcoal/50 block">Premium Greek marble slabs, veneer panelling, and customized hardware.</span>
                       </div>
-                      <div className="col-span-4 text-right self-center">${selectedInvoice.material_cost.toLocaleString()}</div>
+                      <div className="col-span-4 text-right self-center">₹{selectedInvoice.material_cost.toLocaleString()}</div>
                     </div>
                     <div className="grid grid-cols-12 p-3 text-charcoal/80">
                       <div className="col-span-8">
                         <span className="font-medium block">Construction Labor & Project Management</span>
                         <span className="text-[10px] text-charcoal/50 block">Certified carpentry works, civil customizations & turnkey installations.</span>
                       </div>
-                      <div className="col-span-4 text-right self-center">${selectedInvoice.labour_cost.toLocaleString()}</div>
+                      <div className="col-span-4 text-right self-center">₹{selectedInvoice.labour_cost.toLocaleString()}</div>
                     </div>
                     <div className="grid grid-cols-12 p-3 text-charcoal/80 bg-beige-dark/10">
                       <div className="col-span-8">
                         <span className="font-medium block">Goods & Services Tax (GST 18%)</span>
                         <span className="text-[10px] text-charcoal/50 block">Statutory central & state taxation on construction contracts.</span>
                       </div>
-                      <div className="col-span-4 text-right self-center">${selectedInvoice.tax_amount.toLocaleString()}</div>
+                      <div className="col-span-4 text-right self-center">₹{selectedInvoice.tax_amount.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
@@ -342,7 +342,7 @@ export default function CustomerQuotations() {
                 <div className="flex flex-col items-end gap-0.5">
                   <span className="text-xs uppercase font-bold text-charcoal/40">Grand Total Net Budget</span>
                   <span className="font-serif font-extrabold text-gold text-2xl">
-                    ${selectedInvoice.total_amount.toLocaleString()}
+                    ₹{selectedInvoice.total_amount.toLocaleString()}
                   </span>
                 </div>
               </div>

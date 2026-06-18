@@ -43,7 +43,7 @@ class TimelineService:
             events.append({
                 "type": "quotation",
                 "title": "Quotation Generated",
-                "description": f"Total Amount: ${float(quot.total_amount):,.2f} for area {float(quot.area_sqft)} sqft ({quot.material_grade} Grade)",
+                "description": f"Total Amount: ₹{float(quot.total_amount):,.2f} for area {float(quot.area_sqft)} sqft ({quot.material_grade} Grade)",
                 "created_at": quot.created_at.isoformat()
             })
 
