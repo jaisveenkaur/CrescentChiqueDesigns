@@ -6,7 +6,7 @@ import threading
 import time
 from http.cookiejar import CookieJar
 
-BASE_URL = "http://127.0.0.1:5000/api/v1"
+BASE_URL = "http://127.0.0.1:5001/api/v1"
 
 class SimpleSMTPServer:
     """A minimal RFC-compliant SMTP server for intercepting emails sent during tests."""

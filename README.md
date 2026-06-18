@@ -1,225 +1,173 @@
-# Crescent Chique Designs SaaS Backend
+# Crescent Chique Designs — Full-Stack Interior Design SaaS Portal
 
-Crescent Chique Designs is a premium Software-as-a-Service (SaaS) platform tailored for high-end boutique interior design and renovation execution. The backend is built using the Flask web application framework, SQLAlchemy ORM, and MySQL, structured using the Application Factory and Service-Layer architectural patterns.
+Crescent Chique Designs is a premium full-stack Software-as-a-Service (SaaS) application tailored for high-end boutique interior design studios. The platform automates the end-to-end client engagement and renovation execution lifecycle, from custom lead generation and consultation bookings to cost calculations, contract approvals, invoice downloads, and visual project milestone tracking.
 
 ---
 
-## 1. Project Overview
+## 1. Project Architecture
 
-### 1.1 Purpose
-The platform automates the end-to-end operational lifecycle of premium interior design projects, from initial client consultation and cost estimation to construction milestones and final handover.
+The application is split into two major decoupled layers communicating via structured REST APIs:
 
-### 1.2 User Roles
-- **Customers**: Registered clients who can view design catalogs, schedule consultation slots, simulate and save cost quotations, track project progress, upload spatial specifications (PDFs/Images), submit custom inquiry leads, and view platform alerts.
-- **Administrators**: System owners who manage incoming inquiries, update consultation bookings, adjust project progress percentages/statuses, manage database objects (soft delete and restore), and monitor platform-wide operational statistics.
-
-### 1.3 Business Workflow
 ```mermaid
-graph TD
-    A[Guest/Customer Submits Lead] --> B[Admin Contacts & Qualifies Lead]
-    B --> C[Customer Books Consultation Appointment]
-    C --> D[Cost Quotation Simulated & Saved]
-    D --> E[Admin Approves Quotation & Project is Created]
-    E --> F[Project Traverses Milestones: Execution -> Quality Check]
-    F --> G[Project Handover & Completion]
+graph LR
+    subgraph Client Portal [Next.js Client]
+        A[Next.js SPA Portals] --> B[Axios API Clients]
+    end
+    subgraph Studio Engine [Flask API Server]
+        B --> C[Flask Blueprints]
+        C --> D[Service Validation Layers]
+        D --> E[SQLAlchemy Models]
+    end
+    subgraph Data Tier [MySQL Database]
+        E --> F[(MySQL 8.0 / DB)]
+    end
 ```
 
----
-
-## 2. Features
-
-- **Authentication & Authorization**: Secure, stateful session cookie tracking via Flask-Login with role-based restriction controls (Admin vs. Customer).
-- **Design Portfolio**: A gallery catalog database filterable by styles (e.g., Scandinavian, Industrial) and room layouts.
-- **Appointment Scheduling**: Interactive slots reservation with past-date checks and Admin confirmation.
-- **Quotation Cost Engine**: On-the-fly cost estimation calculators and persistent quotation storage utilizing tier-based pricing (Economy, Premium, Luxury).
-- **Project Progress Tracking**: Dynamic renovation milestones tracking (Lead Created -> Completed) with progress percentages (0-100%).
-- **Notifications & Alerts**: Customer notifications system tracking read/unread alerts.
-- **Secure File Uploads**: Clamped to 10MB limits, validating files extension types (`.pdf`, `.png`, `.jpg`, `.jpeg`).
-- **Lead Management**: Lead capture tracking qualified states (`new`, `contacted`, `qualified`, `lost`).
-- **Dashboard Analytics**: Efficient, aggregate database analytics summaries for customers and admins.
-- **Universal Search & Pagination**: Standard query parameters filtering (`page`, `per_page`, search terms) across all listing APIs.
-- **Soft Delete & Recovery**: Reusable model restoration layer filtering soft-deleted entries (`is_deleted=True`) by default.
+- **Frontend Portal**: Built with Next.js 16 (App Router), React 19, Framer Motion, and TailwindCSS. It provides sleek, glassmorphic client dashboards and CRM analytics controls for administrators.
+- **Backend Service**: Built on Python 3.12, Flask, and SQLAlchemy. It implements the **Application Factory** and **Service-Layer** patterns to isolate business rules from endpoint routing.
+- **Database Storage**: Local/production MySQL database instance managing relationships between customers, leads, appointments, projects, quotations, notifications, and system audit logs.
 
 ---
 
-## 3. Tech Stack
+## 2. Directory Structure
 
-- **Backend**: Python 3.12, Flask, SQLAlchemy ORM, Flask-Login, Flask-Migrate
-- **Database**: MySQL 8.0, PyMySQL
-- **Tools**: Postman, Git, GitHub
-
----
-
-## 4. Architecture
-
-The backend implements the **Application Factory** and **Service Layer** design patterns to decouple route control handlers from business logic and database persistence:
-
-- **Blueprints (Controllers)**: Declare routes, parse query string parameters, enforce cookie session roles, and return JSON payloads.
-- **Services (Business Logic)**: Houses validation checks, formula calculators, and database aggregate calculations.
-- **Models (Database)**: Declarative SQLAlchemy entities inheriting from `UUIDBase` which provides auto-generated UUID primary keys and soft delete attributes.
-
-### Folder Structure
 ```
-crescent-chique-designs/
+Crescent Chique Designs/
 │
-├── run.py                     # Application entrypoint
+├── run.py                     # Backend application entrypoint (Flask)
 ├── config.py                  # Environment-specific settings
-├── requirements.txt           # Dependency manifest
-├── migrations/                # Alembic database migration files
-├── docs/                      # QA checklists and API documentations
+├── requirements.txt           # Python dependency manifest
+├── DEPLOYMENT.md              # Production deployment & rollback guide
+├── PRODUCTION_CHECKLIST.md    # Pre-deployment validation verification list
+├── LOGIN_CREDENTIALS.md       # Pre-seeded test credentials overview
 │
-└── app/
-    ├── __init__.py            # Flask Application Factory constructor
-    ├── extensions.py          # Extensions manager (DB, login, migrations)
-    ├── models.py              # Declarative SQLAlchemy ORM models
-    │
-    ├── blueprints/            # Route controllers
-    │   ├── auth.py
-    │   ├── appointments.py
-    │   ├── dashboard.py
-    │   ├── files.py
-    │   ├── leads.py
-    │   ├── projects.py
-    │   └── quotations.py
-    │
-    └── services/              # Business logic & validation layers
-        ├── appointment_service.py
-        ├── dashboard_service.py
-        ├── file_service.py
-        ├── lead_service.py
-        ├── project_service.py
-        ├── quotation_service.py
-        └── soft_delete_service.py
+├── app/                       # Flask application modules
+│   ├── __init__.py            # Flask App Factory initialization
+│   ├── extensions.py          # SQLAlchemy, Migrate, Login, and Mail setup
+│   ├── models.py              # Declarative SQLAlchemy ORM database models
+│   ├── blueprints/            # REST API endpoints & route controllers
+│   └── services/              # Business logic, cost calculations, & mailers
+│
+├── scripts/                   # Seeding, cleanup, and database backup utilities
+│   ├── backup_db.sh           # MySQL gzip database compression backups
+│   └── seed_realistic_data.py # Demo database population utility
+│
+└── frontend/                  # Next.js frontend portal app
+    ├── package.json           # Node modules & execution script mapping
+    ├── src/
+    │   ├── app/               # Page routing & Layout structures
+    │   ├── components/        # Shareable UI widgets (modals, nav, tables)
+    │   └── services/          # Client API calls matching backend routes
+    └── public/                # Static brand graphics and layout photos
 ```
 
 ---
 
-## 5. Installation Guide
+## 3. Local Installation & Development Setup
 
-### Prerequisites
-- Python 3.12+ installed.
-- MySQL 8.0+ service running locally.
+### A. Backend Development Service Setup
 
-### Setup Steps
-1. Clone the repository:
+1. **Initialize Virtual Environment**:
    ```bash
-   git clone https://github.com/jaisveenkaur/CrescentChiqueDesigns.git
-   cd CrescentChiqueDesigns
-   ```
-
-2. Initialize virtual environment:
-   ```bash
-   python -m venv .venv
+   python3 -m venv .venv
    source .venv/bin/activate
    ```
 
-3. Install requirements:
+2. **Install Dependencies**:
    ```bash
+   pip install --upgrade pip
    pip install -r requirements.txt
    ```
 
-4. Configure environment settings:
-   Copy `.env.example` to `.env` and adjust database variables:
-   ```env
+3. **Configure Environment Parameters**:
+   Create a `.env` file in the root directory:
+   ```ini
    FLASK_ENV=development
-   DATABASE_URL=mysql+pymysql://<user>:<password>@localhost:3306/crescent_chique
-   SECRET_KEY=your-session-secret-key
+   FLASK_APP=run.py
+   SECRET_KEY=dev-secret-key-crescent-chique-2026
+   
+   # Database configuration
+   DB_USER=root
+   DB_PASSWORD=your_mysql_password
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=crescent_chique_db
+   
+   # Flask-Mail configuration
+   MAIL_SERVER=localhost
+   MAIL_PORT=1025
+   MAIL_USE_TLS=False
+   MAIL_DEFAULT_SENDER=no-reply@crescentchique.com
    ```
 
----
-
-## 6. Database Setup
-
-1. Run Alembic migrations to construct the database schema:
+4. **Run Database Migrations & Seed Data**:
+   Ensure MySQL service is active, and run:
    ```bash
+   # Apply schema migrations
    flask db upgrade
+   
+   # Seed 25 customers, 40 leads, 20 projects, 30 quotations, and related items
+   python scripts/seed_realistic_data.py
    ```
 
-2. Seed the database with default administrative profiles, portfolio designs, and sample operations records:
+5. **Start Flask Server**:
    ```bash
-   python scripts/seed_db.py
+   python run.py
+   ```
+   *(Backend serves APIs locally at `http://127.0.0.1:5001/`)*
+
+---
+
+### B. Frontend Portal App Setup
+
+1. **Navigate and Install Node Modules**:
+   ```bash
+   cd frontend
+   npm install
    ```
 
----
+2. **Configure Client Environment**:
+   Create a `frontend/.env.local` configuration file:
+   ```ini
+   NEXT_PUBLIC_API_URL=http://127.0.0.1:5001/api/v1
+   ```
 
-## 7. Running the Application
-
-Start the Flask built-in development server:
-```bash
-flask run --port 5000
-```
-The application will bind to `http://127.0.0.1:5000/`. You can query the health endpoint `/` to confirm connectivity:
-```json
-{
-  "status": "running",
-  "application": "Crescent Chique Designs",
-  "database": "connected"
-}
-```
+3. **Start Next.js Development Server**:
+   ```bash
+   npm run dev
+   ```
+   *(Frontend app serves client portal locally at `http://localhost:3000/`)*
 
 ---
 
-## 8. API Endpoints Overview
+## 4. API Modules Summary
 
-For detailed request/response payload examples, refer to [API_DOCUMENTATION.md](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/docs/API_DOCUMENTATION.md).
+| Module | Purpose | Endpoint | Authorization |
+| :--- | :--- | :--- | :--- |
+| **Auth** | User sessions & updates | `/api/v1/auth/login`, `/logout`, `/profile` | Public / Authenticated |
+| **Designs** | Catalog portfolio items | `/api/v1/designs` (GET, POST, PUT, DELETE) | Public / Admin |
+| **Appointments**| Booking consultations | `/api/v1/appointments` (POST, GET, PUT, DELETE) | Customer / Admin |
+| **Quotations** | Cost calculations & PDFs| `/api/v1/quotations` (POST, GET, DELETE, RESTORE) | Customer / Admin |
+| **Projects** | Progress milestones | `/api/v1/projects` (GET, PUT, DELETE, RESTORE) | Customer / Admin |
+| **Files** | Upload specification attachments | `/api/v1/files` (POST, GET, DELETE, RESTORE) | Customer / Admin |
+| **Leads** | Inquiries pipeline tracking | `/api/v1/leads` (POST, GET, PUT, DELETE, RESTORE) | Customer / Admin |
+| **Dashboard** | Metrics aggregates & charts | `/api/v1/dashboard/admin`, `/customer` | Admin / Customer |
+| **Audit Logs** | Security access operations logs | `/api/v1/audit-logs` (GET) | Admin |
 
-| Module | Method | Endpoint | Description | Authorization |
-| :--- | :--- | :--- | :--- | :--- |
-| **Auth** | `POST` | `/api/v1/auth/register` | Registers customer profile | Public |
-| | `POST` | `/api/v1/auth/login` | Login user session | Public |
-| | `POST` | `/api/v1/auth/logout` | Logout user session | Authenticated |
-| | `GET` | `/api/v1/auth/profile` | Retrieve profile metadata | Authenticated |
-| | `PUT` | `/api/v1/auth/profile` | Update profile metadata details | Authenticated |
-| **Designs** | `GET` | `/api/v1/designs` | Lists design portfolio | Public |
-| | `GET` | `/api/v1/designs/<id>` | Get design specifications | Public |
-| | `POST` | `/api/v1/designs` | Create design entry | Admin |
-| | `PUT` | `/api/v1/designs/<id>` | Update design details | Admin |
-| | `DELETE` | `/api/v1/designs/<id>` | Soft delete design entry | Admin |
-| **Appointments** | `POST` | `/api/v1/appointments` | Book consultation slot | Customer |
-| | `GET` | `/api/v1/appointments` | Lists appointments (Paginated) | Customer / Admin |
-| | `PUT` | `/api/v1/appointments/<id>/status` | Update booking status | Admin |
-| | `DELETE` | `/api/v1/appointments/<id>` | Soft cancel slot booking | Owner / Admin |
-| **Quotations** | `POST` | `/api/v1/quotations/generate` | On-the-fly cost calculation | Public |
-| | `POST` | `/api/v1/quotations` | Create and save quotation | Customer |
-| | `GET` | `/api/v1/quotations` | Lists quotations (Paginated) | Customer / Admin |
-| | `GET` | `/api/v1/quotations/<id>/pdf` | Download quotation PDF | Customer / Admin |
-| | `DELETE` | `/api/v1/quotations/<id>` | Soft delete quotation | Admin |
-| | `PUT` | `/api/v1/quotations/<id>/restore`| Restore quotation | Admin |
-| **Projects** | `GET` | `/api/v1/projects` | Lists projects (Paginated) | Customer / Admin |
-| | `PUT` | `/api/v1/projects/<id>/status` | Update progress & milestones | Admin |
-| | `DELETE` | `/api/v1/projects/<id>` | Soft delete project tracker | Admin |
-| | `PUT` | `/api/v1/projects/<id>/restore` | Restore project tracker | Admin |
-| **Notifications** | `GET` | `/api/v1/notifications` | Lists client alerts | Customer |
-| | `GET` | `/api/v1/notifications/<id>` | Get notification details | Customer |
-| | `PUT` | `/api/v1/notifications/<id>/read`| Mark alert as read | Customer |
-| **Files** | `POST` | `/api/v1/files/upload` | Upload PDF/image specifications | Customer |
-| | `GET` | `/api/v1/files` | Lists files metadata (Paginated) | Customer / Admin |
-| | `DELETE` | `/api/v1/files/<id>` | Soft delete file record | Admin |
-| | `PUT` | `/api/v1/files/<id>/restore` | Restore file record | Admin |
-| **Leads** | `POST` | `/api/v1/leads` | Submit custom lead inquiry | Customer |
-| | `GET` | `/api/v1/leads` | Lists system leads (Paginated) | Customer / Admin |
-| | `PUT` | `/api/v1/leads/<id>/status` | Modify inquiry status state | Admin |
-| | `DELETE` | `/api/v1/leads/<id>` | Soft delete lead record | Admin |
-| | `PUT` | `/api/v1/leads/<id>/restore` | Restore lead record | Admin |
-| **Dashboard** | `GET` | `/api/v1/dashboard/admin` | Administrative statistics | Admin |
-| | `GET` | `/api/v1/dashboard/customer` | Customer metrics overview | Customer |
-| **Audit Logs** | `GET` | `/api/v1/audit-logs` | Lists system audit logs (Paginated) | Admin |
+*For complete API schemas and detailed payload examples, refer to [API_DOCUMENTATION.md](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/docs/API_DOCUMENTATION.md).*
 
 ---
 
-## 9. Testing
+## 5. Seeded Test Credentials
 
-The entire backend API can be validated using the structured Postman collection sequences.
-To run manual and verification checks:
-1. Ensure the database is loaded with fresh seed records (`python scripts/seed_db.py`).
-2. Run tests to evaluate session authentication, invalid payload checks, pagination boundary clamps, and soft delete recovery rules.
-3. Refer to [QA_CHECKLIST.md](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/docs/QA_CHECKLIST.md) for step-by-step payloads, negative test boundaries, and SQL verification queries.
+Refer to [LOGIN_CREDENTIALS.md](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/LOGIN_CREDENTIALS.md) for pre-seeded developer testing account login details:
+- **Chief Administrator**: `admin@crescentchique.com` / `CCAdmin2026!`
+- **John Doe (Customer)**: `john.doe@gmail.com` / `JohnDoe2026!`
 
 ---
 
-## 10. Future Enhancements
+## 6. Production Deployment Guides
 
-- **Email Notifications**: Integration with SMTP/SendGrid to push transaction emails automatically when a project transitions milestones.
-- **PDF Export Engine**: Generate print-ready formatted PDFs for quotations.
-- **Frontend SPA Dashboard**: React or Vue based single page application linking client widgets to these JSON endpoints.
-- **Containerized Deployment**: Docker compose blueprints for quick service orchestrations in production (ECS/Kubernetes).
+To prepare, validate, and launch the application onto staging/production servers, please refer to the following checklists:
+1. **Deployment Architecture Setup Guide**: [DEPLOYMENT.md](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/DEPLOYMENT.md)
+2. **Pre-Flight Readiness Validation Checklist**: [PRODUCTION_CHECKLIST.md](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/PRODUCTION_CHECKLIST.md)
