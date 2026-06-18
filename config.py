@@ -52,16 +52,20 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    # In production environments, DATABASE_URL must be explicitly provided
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    
-    # Session cookie properties for cross-domain support in production (SameSite=None, Secure=True)
+
+    SQLALCHEMY_DATABASE_URI = (
+        os.environ.get("DATABASE_URL")
+        .replace("postgres://", "postgresql://")
+        if os.environ.get("DATABASE_URL")
+        else None
+    )
+
     SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SAMESITE = "None"
     REMEMBER_COOKIE_SECURE = True
-    REMEMBER_COOKIE_SAMESITE = 'None'
+    REMEMBER_COOKIE_SAMESITE = "None"
 
-
+    
 config_by_name = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
