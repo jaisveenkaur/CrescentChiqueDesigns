@@ -36,3 +36,5 @@ Thumbs.db
 # Production database backups
 backups/
 
+# Secret File
+SECRETS.md
