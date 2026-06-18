@@ -536,7 +536,7 @@ export default function Home() {
 
                 <div className="flex justify-between items-center pt-5 border-t border-gold/10 mt-auto">
                   <span className="text-sm font-serif font-light text-charcoal/80">
-                    Est: <span className="font-semibold font-sans text-gold">${design.price_per_sqft}</span> / sqft
+                    Est: <span className="font-semibold font-sans text-gold">₹{design.price_per_sqft}</span> / sqft
                   </span>
                   <Link
                     href={`/gallery`}
