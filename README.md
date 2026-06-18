@@ -84,7 +84,7 @@ Crescent Chique Designs/
    ```ini
    FLASK_ENV=development
    FLASK_APP=run.py
-   SECRET_KEY=dev-secret-key-crescent-chique-2026
+   SECRET_KEY=your_long_secret_key
    
    # Database configuration
    DB_USER=root
@@ -114,7 +114,6 @@ Crescent Chique Designs/
    ```bash
    python run.py
    ```
-   *(Backend serves APIs locally at `http://127.0.0.1:5001/`)*
 
 ---
 
@@ -129,14 +128,13 @@ Crescent Chique Designs/
 2. **Configure Client Environment**:
    Create a `frontend/.env.local` configuration file:
    ```ini
-   NEXT_PUBLIC_API_URL=http://127.0.0.1:5001/api/v1
+   NEXT_PUBLIC_API_URL=your_api_url
    ```
 
 3. **Start Next.js Development Server**:
    ```bash
    npm run dev
    ```
-   *(Frontend app serves client portal locally at `http://localhost:3000/`)*
 
 ---
 
@@ -161,8 +159,8 @@ Crescent Chique Designs/
 ## 5. Seeded Test Credentials
 
 Refer to [LOGIN_CREDENTIALS.md](file:///Users/jaisveenkaur/Desktop/Projects/Crescent%20Chique%20Designs/LOGIN_CREDENTIALS.md) for pre-seeded developer testing account login details:
-- **Chief Administrator**: `admin@crescentchique.com` / `CCAdmin2026!`
-- **John Doe (Customer)**: `john.doe@gmail.com` / `JohnDoe2026!`
+- **Chief Administrator**: `admin@crescentchique.com`
+- **John Doe (Customer)**: `john.doe@gmail.com`
 
 ---
 

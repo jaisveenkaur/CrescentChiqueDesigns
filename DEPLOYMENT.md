@@ -23,7 +23,7 @@ DB_PORT=3306
 DB_NAME=crescent_chique_db
 
 # CORS Config (Comma-separated list of allowed domains in production)
-ALLOWED_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://crescentchique.vercel.app
+ALLOWED_CORS_ORIGINS=http://localhost:3000, http://127.0.0.1:3000,https://crescentchique.vercel.app
 
 # Persistent File Upload storage directory
 UPLOAD_FOLDER=/mnt/persistent_uploads
@@ -45,7 +45,7 @@ Create a `.env.local` file inside the `frontend/` directory:
 
 ```ini
 # API Connection URL (Points to the backend Flask API)
-NEXT_PUBLIC_API_URL=http://127.0.0.1:5001/api/v1
+NEXT_PUBLIC_API_URL= your_api_url_here
 ```
 
 ---
@@ -124,8 +124,8 @@ python scripts/seed_realistic_data.py
 ```
 
 *Note: This script purges existing database records to maintain logical relationships. The default seed user accounts are:*
-* **Admin**: `admin@crescentchique.com` / `CCAdmin2026!`
-* **Customer**: `john.doe@gmail.com` / `JohnDoe2026!`
+* **Admin**: `admin@crescentchique.com`
+* **Customer**: `john.doe@gmail.com`
 
 ---
 
@@ -149,7 +149,6 @@ npm run build
   ```bash
   npm run dev
   ```
-  *(Default server runs at `http://localhost:3000`)*
 * **For Production hosting**:
   ```bash
   npm run start
