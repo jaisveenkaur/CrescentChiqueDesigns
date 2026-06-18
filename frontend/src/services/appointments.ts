@@ -30,7 +30,7 @@ export const appointmentService = {
       const response = await api.get('/appointments', { params });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /appointments failed",
         error.response?.status,
         error.response?.data
@@ -49,7 +49,7 @@ export const appointmentService = {
       const response = await api.post('/appointments', data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /appointments failed",
         error.response?.status,
         error.response?.data
@@ -66,7 +66,7 @@ export const appointmentService = {
       const response = await api.put(`/appointments/${id}/status`, { status });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /appointments/${id}/status failed`,
         error.response?.status,
         error.response?.data
@@ -80,7 +80,7 @@ export const appointmentService = {
       const response = await api.delete(`/appointments/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `DELETE /appointments/${id} failed`,
         error.response?.status,
         error.response?.data

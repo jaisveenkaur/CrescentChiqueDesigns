@@ -30,7 +30,7 @@ export const authService = {
       }
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /auth/login failed",
         error.response?.status,
         error.response?.data
@@ -52,7 +52,7 @@ export const authService = {
       const response = await api.post('/auth/register', data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /auth/register failed",
         error.response?.status,
         error.response?.data
@@ -65,7 +65,7 @@ export const authService = {
     try {
       await api.post('/auth/logout');
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /auth/logout failed",
         error.response?.status,
         error.response?.data
@@ -87,7 +87,7 @@ export const authService = {
       const response = await api.get('/auth/profile');
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /auth/profile failed",
         error.response?.status,
         error.response?.data
@@ -104,7 +104,7 @@ export const authService = {
       }
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "PUT /auth/profile failed",
         error.response?.status,
         error.response?.data

@@ -30,7 +30,7 @@ export const designService = {
       }
       throw new Error('Invalid response format');
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /designs failed",
         error.response?.status,
         error.response?.data
@@ -44,7 +44,7 @@ export const designService = {
       const response = await api.get(`/designs/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `GET /designs/${id} failed`,
         error.response?.status,
         error.response?.data

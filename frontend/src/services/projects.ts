@@ -35,7 +35,7 @@ export const projectService = {
       }
       return [];
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /projects failed",
         error.response?.status,
         error.response?.data
@@ -49,7 +49,7 @@ export const projectService = {
       const response = await api.get(`/projects/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `GET /projects/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -68,7 +68,7 @@ export const projectService = {
       });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /projects/${id}/progress failed`,
         error.response?.status,
         error.response?.data
@@ -82,7 +82,7 @@ export const projectService = {
       const response = await api.get(`/projects/${projectId}/notes`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `GET /projects/${projectId}/notes failed`,
         error.response?.status,
         error.response?.data
@@ -99,7 +99,7 @@ export const projectService = {
       const response = await api.post(`/projects/${projectId}/notes`, { note });
       return response.data.note;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `POST /projects/${projectId}/notes failed`,
         error.response?.status,
         error.response?.data
@@ -120,7 +120,7 @@ export const projectService = {
       const response = await api.post('/projects', data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /projects failed",
         error.response?.status,
         error.response?.data
@@ -144,7 +144,7 @@ export const projectService = {
       const response = await api.put(`/projects/${id}`, data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /projects/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -158,7 +158,7 @@ export const projectService = {
       const response = await api.delete(`/projects/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `DELETE /projects/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -172,7 +172,7 @@ export const projectService = {
       const response = await api.put(`/projects/${id}/restore`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /projects/${id}/restore failed`,
         error.response?.status,
         error.response?.data

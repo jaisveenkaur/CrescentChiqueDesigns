@@ -29,7 +29,7 @@ export const fileService = {
       const response = await api.get('/files', { params });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /files failed",
         error.response?.status,
         error.response?.data
@@ -49,7 +49,7 @@ export const fileService = {
       });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /files/upload failed",
         error.response?.status,
         error.response?.data
@@ -63,7 +63,7 @@ export const fileService = {
       const response = await api.delete(`/files/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `DELETE /files/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -77,7 +77,7 @@ export const fileService = {
       const response = await api.put(`/files/${id}/restore`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /files/${id}/restore failed`,
         error.response?.status,
         error.response?.data
@@ -93,7 +93,7 @@ export const fileService = {
       });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `GET /files/${id}/download failed`,
         error.response?.status,
         error.response?.data

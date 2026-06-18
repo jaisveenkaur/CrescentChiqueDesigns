@@ -32,7 +32,7 @@ export const leadService = {
       const response = await api.get('/leads', { params });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /leads failed",
         error.response?.status,
         error.response?.data
@@ -46,7 +46,7 @@ export const leadService = {
       const response = await api.get(`/leads/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `GET /leads/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -67,7 +67,7 @@ export const leadService = {
       const response = await api.post('/leads', data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /leads failed",
         error.response?.status,
         error.response?.data
@@ -92,7 +92,7 @@ export const leadService = {
       const response = await api.put(`/leads/${id}`, data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /leads/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -110,7 +110,7 @@ export const leadService = {
       const response = await api.put(`/leads/${id}/status`, { status });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /leads/${id}/status failed`,
         error.response?.status,
         error.response?.data
@@ -124,7 +124,7 @@ export const leadService = {
       const response = await api.delete(`/leads/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `DELETE /leads/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -138,7 +138,7 @@ export const leadService = {
       const response = await api.put(`/leads/${id}/restore`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /leads/${id}/restore failed`,
         error.response?.status,
         error.response?.data

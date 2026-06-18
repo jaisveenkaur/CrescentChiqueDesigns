@@ -107,7 +107,7 @@ export const dashboardService = {
       console.log('[DASHBOARD API SUCCESS] Loaded admin stats');
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "[DASHBOARD API FAILED] GET /dashboard/admin failed",
         error.response?.status,
         error.response?.data
@@ -122,7 +122,7 @@ export const dashboardService = {
       console.log('[ANALYTICS API SUCCESS] Loaded admin analytics');
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "[ANALYTICS API FAILED] GET /dashboard/admin/analytics failed",
         error.response?.status,
         error.response?.data
@@ -137,7 +137,7 @@ export const dashboardService = {
       console.log('[DASHBOARD API SUCCESS] Loaded customer stats');
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "[DASHBOARD API FAILED] GET /dashboard/customer failed",
         error.response?.status,
         error.response?.data
@@ -151,7 +151,7 @@ export const dashboardService = {
       const response = await api.get('/timeline');
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /timeline failed",
         error.response?.status,
         error.response?.data
@@ -170,7 +170,7 @@ export const dashboardService = {
       const response = await api.get('/audit-logs', { params });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /audit-logs failed",
         error.response?.status,
         error.response?.data

@@ -32,7 +32,7 @@ export const quotationService = {
       const response = await api.post('/quotations/generate', data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /quotations/generate failed",
         error.response?.status,
         error.response?.data
@@ -52,7 +52,7 @@ export const quotationService = {
       const response = await api.post('/quotations', data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /quotations failed",
         error.response?.status,
         error.response?.data
@@ -75,7 +75,7 @@ export const quotationService = {
       const response = await api.put(`/quotations/${id}`, data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /quotations/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -96,7 +96,7 @@ export const quotationService = {
       const response = await api.get('/quotations', { params });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /quotations failed",
         error.response?.status,
         error.response?.data
@@ -110,7 +110,7 @@ export const quotationService = {
       const response = await api.get(`/quotations/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `GET /quotations/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -124,7 +124,7 @@ export const quotationService = {
       const response = await api.delete(`/quotations/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `DELETE /quotations/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -138,7 +138,7 @@ export const quotationService = {
       const response = await api.put(`/quotations/${id}/restore`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /quotations/${id}/restore failed`,
         error.response?.status,
         error.response?.data
@@ -154,7 +154,7 @@ export const quotationService = {
       });
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `GET /quotations/${id}/pdf failed`,
         error.response?.status,
         error.response?.data

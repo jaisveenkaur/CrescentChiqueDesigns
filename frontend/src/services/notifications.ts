@@ -16,7 +16,7 @@ export const notificationService = {
       const response = await api.get('/notifications');
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "GET /notifications failed",
         error.response?.status,
         error.response?.data
@@ -30,7 +30,7 @@ export const notificationService = {
       const response = await api.get(`/notifications/${id}`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `GET /notifications/${id} failed`,
         error.response?.status,
         error.response?.data
@@ -46,7 +46,7 @@ export const notificationService = {
       const response = await api.put(`/notifications/${id}/read`);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         `PUT /notifications/${id}/read failed`,
         error.response?.status,
         error.response?.data
@@ -60,7 +60,7 @@ export const notificationService = {
       const response = await api.post('/notifications', data);
       return response.data;
     } catch (error: any) {
-      console.error(
+      console.warn(
         "POST /notifications failed",
         error.response?.status,
         error.response?.data

@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return response.data;
     } catch (error: any) {
-      console.error(`[SESSION FAILED] Profile refresh failed:`, error.response?.status, error.response?.data);
+      console.warn(`[SESSION FAILED] Profile refresh failed:`, error.response?.status, error.response?.data);
       setUser(null);
       if (typeof window !== 'undefined') {
         localStorage.removeItem('is_logged_in');
