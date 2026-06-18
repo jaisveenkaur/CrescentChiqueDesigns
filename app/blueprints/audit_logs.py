@@ -22,9 +22,12 @@ def get_audit_logs():
     """Fetches paginated list of system audit log entries (Admin only)."""
     page_param = request.args.get('page')
     per_page_param = request.args.get('per_page')
-    
+    action_filter = request.args.get('action')
+    if action_filter == 'all':
+        action_filter = None
+        
     filters = {
-        'action': request.args.get('action'),
+        'action': action_filter,
         'user_id': request.args.get('user_id')
     }
     
