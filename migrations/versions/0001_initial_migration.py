@@ -29,7 +29,7 @@ def upgrade():
         sa.Column('is_deleted', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('email', name='uq_users_email')
     )
@@ -48,7 +48,7 @@ def upgrade():
         sa.Column('is_deleted', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], name='fk_customers_user_id', onupdate='CASCADE', ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('user_id', name='uq_customers_user_id')
@@ -68,7 +68,7 @@ def upgrade():
         sa.Column('is_deleted', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_index('idx_designs_style_room', 'designs', ['style', 'room_type'])
@@ -83,7 +83,7 @@ def upgrade():
         sa.Column('is_deleted', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.ForeignKeyConstraint(['design_id'], ['designs.id'], name='fk_design_images_design_id', onupdate='CASCADE', ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
@@ -102,7 +102,7 @@ def upgrade():
         sa.Column('is_deleted', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], name='fk_appointments_customer_id', onupdate='CASCADE', ondelete='RESTRICT'),
         sa.PrimaryKeyConstraint('id')
     )
@@ -126,7 +126,7 @@ def upgrade():
         sa.Column('is_deleted', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], name='fk_quotations_customer_id', onupdate='CASCADE', ondelete='RESTRICT'),
         sa.ForeignKeyConstraint(['design_id'], ['designs.id'], name='fk_quotations_design_id', onupdate='CASCADE', ondelete='SET NULL'),
         sa.PrimaryKeyConstraint('id')
@@ -146,7 +146,7 @@ def upgrade():
         sa.Column('is_deleted', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], name='fk_projects_customer_id', onupdate='CASCADE', ondelete='RESTRICT'),
         sa.ForeignKeyConstraint(['quotation_id'], ['quotations.id'], name='fk_projects_quotation_id', onupdate='CASCADE', ondelete='RESTRICT'),
         sa.PrimaryKeyConstraint('id'),
@@ -168,7 +168,7 @@ def upgrade():
         sa.Column('is_deleted', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('deleted_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], name='fk_leads_customer_id', onupdate='CASCADE', ondelete='SET NULL'),
         sa.PrimaryKeyConstraint('id')
     )
@@ -176,23 +176,10 @@ def upgrade():
     op.create_index('idx_leads_email_phone', 'leads', ['email', 'phone'])
     op.create_index('idx_leads_status', 'leads', ['status'])
 
-    # 9. notifications table
-    op.create_table(
-        'notifications',
-        sa.Column('id', sa.String(length=36), nullable=False),
-        sa.Column('user_id', sa.String(length=36), nullable=False),
-        sa.Column('title', sa.String(length=150), nullable=False),
-        sa.Column('message', sa.Text(), nullable=False),
-        sa.Column('is_read', sa.Boolean(), nullable=False, server_default='0'),
-        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], name='fk_notifications_user_id', onupdate='CASCADE', ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index('idx_notifications_user_unread', 'notifications', ['user_id', 'is_read'])
+
 
 
 def downgrade():
-    op.drop_table('notifications')
     op.drop_table('leads')
     op.drop_table('projects')
     op.drop_table('quotations')
