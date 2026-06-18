@@ -295,22 +295,22 @@ export default function CustomerDashboard() {
                         <div 
                           className="bg-[#C9A36B] h-full" 
                           style={{ width: `${(quote.design_cost / quote.total_amount) * 100}%` }}
-                          title={`Design: $${quote.design_cost.toLocaleString()}`}
+                          title={`Design: ₹${quote.design_cost.toLocaleString()}`}
                         />
                         <div 
                           className="bg-[#D4AF37] h-full" 
                           style={{ width: `${(quote.material_cost / quote.total_amount) * 100}%` }}
-                          title={`Material: $${quote.material_cost.toLocaleString()}`}
+                          title={`Material: ₹${quote.material_cost.toLocaleString()}`}
                         />
                         <div 
                           className="bg-[#1F2937] h-full" 
                           style={{ width: `${(quote.labour_cost / quote.total_amount) * 100}%` }}
-                          title={`Labour: $${quote.labour_cost.toLocaleString()}`}
+                          title={`Labour: ₹${quote.labour_cost.toLocaleString()}`}
                         />
                         <div 
                           className="bg-[#E6C687] h-full" 
                           style={{ width: `${(quote.tax_amount / quote.total_amount) * 100}%` }}
-                          title={`GST: $${quote.tax_amount.toLocaleString()}`}
+                          title={`GST: ₹${quote.tax_amount.toLocaleString()}`}
                         />
                       </div>
                       <div className="flex justify-between text-[8px] text-charcoal/50">

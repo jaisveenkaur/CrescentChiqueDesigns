@@ -171,22 +171,22 @@ export default function CustomerQuotations() {
                     <div 
                       className="bg-[#C9A36B] h-full transition-all duration-500 hover:brightness-105" 
                       style={{ width: `${(quote.design_cost / quote.total_amount) * 100}%` }}
-                      title={`Design Cost: $${quote.design_cost.toLocaleString()} (${((quote.design_cost / quote.total_amount) * 100).toFixed(1)}%)`}
+                      title={`Design Cost: ₹${quote.design_cost.toLocaleString()} (${((quote.design_cost / quote.total_amount) * 100).toFixed(1)}%)`}
                     />
                     <div 
                       className="bg-[#D4AF37] h-full transition-all duration-500 hover:brightness-105" 
                       style={{ width: `${(quote.material_cost / quote.total_amount) * 100}%` }}
-                      title={`Material Cost: $${quote.material_cost.toLocaleString()} (${((quote.material_cost / quote.total_amount) * 100).toFixed(1)}%)`}
+                      title={`Material Cost: ₹${quote.material_cost.toLocaleString()} (${((quote.material_cost / quote.total_amount) * 100).toFixed(1)}%)`}
                     />
                     <div 
                       className="bg-[#1F2937] h-full transition-all duration-500 hover:brightness-105" 
                       style={{ width: `${(quote.labour_cost / quote.total_amount) * 100}%` }}
-                      title={`Labour Cost: $${quote.labour_cost.toLocaleString()} (${((quote.labour_cost / quote.total_amount) * 100).toFixed(1)}%)`}
+                      title={`Labour Cost: ₹${quote.labour_cost.toLocaleString()} (${((quote.labour_cost / quote.total_amount) * 100).toFixed(1)}%)`}
                     />
                     <div 
                       className="bg-[#E6C687] h-full transition-all duration-500 hover:brightness-105" 
                       style={{ width: `${(quote.tax_amount / quote.total_amount) * 100}%` }}
-                      title={`GST (18%): $${quote.tax_amount.toLocaleString()} (${((quote.tax_amount / quote.total_amount) * 100).toFixed(1)}%)`}
+                      title={`GST (18%): ₹${quote.tax_amount.toLocaleString()} (${((quote.tax_amount / quote.total_amount) * 100).toFixed(1)}%)`}
                     />
                   </div>
 
